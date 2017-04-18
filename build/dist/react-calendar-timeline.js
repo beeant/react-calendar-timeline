@@ -225,11 +225,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function componentDidMount() {
 	      var _this2 = this;
 	
-	      this.resize();
+	      this.resize(this.props);
 	
 	      this.resizeEventListener = {
 	        handleEvent: function handleEvent(event) {
-	          _this2.resize();
+	          _this2.resize(_this2.props);
 	        }
 	      };
 	
@@ -251,15 +251,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'resize',
-	    value: function resize() {
-	      // FIXME currently when the component creates a scroll the scrollbar is not used in the initial width calculation, resizing fixes this
+	    value: function resize(props) {
 	      var _refs$container$getBo = this.refs.container.getBoundingClientRect(),
 	          containerWidth = _refs$container$getBo.width,
 	          containerTop = _refs$container$getBo.top;
 	
-	      var width = containerWidth - this.props.sidebarWidth - this.props.rightSidebarWidth;
+	      var width = containerWidth - props.sidebarWidth - props.rightSidebarWidth;
 	
-	      var _stackItems = this.stackItems(this.props.items, this.props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width),
+	      var _stackItems = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width),
 	          dimensionItems = _stackItems.dimensionItems,
 	          height = _stackItems.height,
 	          groupHeights = _stackItems.groupHeights,
@@ -281,7 +280,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var visibleTimeStart = nextProps.visibleTimeStart,
 	          visibleTimeEnd = nextProps.visibleTimeEnd,
 	          items = nextProps.items,
-	          groups = nextProps.groups;
+	          groups = nextProps.groups,
+	          sidebarWidth = nextProps.sidebarWidth;
 	
 	
 	      if (visibleTimeStart && visibleTimeEnd) {
@@ -290,6 +290,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      if (items !== this.props.items || groups !== this.props.groups) {
 	        this.updateDimensions(items, groups);
+	      }
+	
+	      if (sidebarWidth && items && groups) {
+	        this.resize(nextProps);
 	      }
 	    }
 	  }, {
@@ -431,7 +435,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        onItemDoubleClick: this.props.onItemDoubleClick,
 	        onItemContextMenu: this.props.onItemContextMenu,
 	        itemResizing: this.resizingItem,
-	        itemResized: this.resizedItem });
+	        itemResized: this.resizedItem,
+	        selected: this.props.selected });
 	    }
 	  }, {
 	    key: 'infoLabel',
@@ -726,7 +731,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  onTimeInit: _react.PropTypes.func,
 	  onBoundsChange: _react.PropTypes.func,
 	
-	  children: _react.PropTypes.node
+	  children: _react.PropTypes.node,
+	
+	  selected: _react.PropTypes.array
 	};
 	ReactCalendarTimeline.defaultProps = {
 	  sidebarWidth: 150,
@@ -788,7 +795,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  onTimeInit: null,
 	  // called when the canvas area of the calendar changes
 	  onBoundsChange: null,
-	  children: null
+	  children: null,
+	
+	  selected: null
 	};
 	
 	var _initialiseProps = function _initialiseProps() {
@@ -1246,7 +1255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Items, [{
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps, nextState) {
-	      return !((0, _utils.arraysEqual)(nextProps.groups, this.props.groups) && (0, _utils.arraysEqual)(nextProps.items, this.props.items) && nextProps.keys === this.props.keys && nextProps.canvasTimeStart === this.props.canvasTimeStart && nextProps.canvasTimeEnd === this.props.canvasTimeEnd && nextProps.canvasWidth === this.props.canvasWidth && nextProps.selectedItem === this.props.selectedItem && nextProps.lineHeight === this.props.lineHeight && nextProps.dragSnap === this.props.dragSnap && nextProps.minResizeWidth === this.props.minResizeWidth && nextProps.canChangeGroup === this.props.canChangeGroup && nextProps.canMove === this.props.canMove && nextProps.canResize === this.props.canResize && nextProps.canSelect === this.props.canSelect && nextProps.dimensionItems === this.props.dimensionItems && nextProps.topOffset === this.props.topOffset);
+	      return !((0, _utils.arraysEqual)(nextProps.groups, this.props.groups) && (0, _utils.arraysEqual)(nextProps.items, this.props.items) && nextProps.keys === this.props.keys && nextProps.canvasTimeStart === this.props.canvasTimeStart && nextProps.canvasTimeEnd === this.props.canvasTimeEnd && nextProps.canvasWidth === this.props.canvasWidth && nextProps.selectedItem === this.props.selectedItem && nextProps.selected === this.props.selected && nextProps.lineHeight === this.props.lineHeight && nextProps.dragSnap === this.props.dragSnap && nextProps.minResizeWidth === this.props.minResizeWidth && nextProps.canChangeGroup === this.props.canChangeGroup && nextProps.canMove === this.props.canMove && nextProps.canResize === this.props.canResize && nextProps.canSelect === this.props.canSelect && nextProps.dimensionItems === this.props.dimensionItems && nextProps.topOffset === this.props.topOffset);
 	    }
 	  }, {
 	    key: 'getGroupOrders',
@@ -1261,6 +1270,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	
 	      return groupOrders;
+	    }
+	  }, {
+	    key: 'isSelected',
+	    value: function isSelected(item, itemIdKey) {
+	      if (!this.props.selected) {
+	        return this.props.selectedItem === (0, _utils._get)(item, itemIdKey);
+	      } else {
+	        var target = (0, _utils._get)(item, itemIdKey);
+	        return this.props.selected.find(function (value) {
+	          return value === target;
+	        });
+	      }
 	    }
 	  }, {
 	    key: 'getVisibleItems',
@@ -1303,7 +1324,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            keys: _this2.props.keys,
 	            order: groupOrders[(0, _utils._get)(item, itemGroupKey)],
 	            dimensions: sortedDimensionItems[(0, _utils._get)(item, itemIdKey)].dimensions,
-	            selected: _this2.props.selectedItem === (0, _utils._get)(item, itemIdKey),
+	            selected: _this2.isSelected(item, itemIdKey),
 	            canChangeGroup: (0, _utils._get)(item, 'canChangeGroup') !== undefined ? (0, _utils._get)(item, 'canChangeGroup') : _this2.props.canChangeGroup,
 	            canMove: (0, _utils._get)(item, 'canMove') !== undefined ? (0, _utils._get)(item, 'canMove') : _this2.props.canMove,
 	            canResizeLeft: canResizeLeft(item, _this2.props.canResize),
@@ -1363,9 +1384,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  itemResized: _react.PropTypes.func,
 	
 	  onItemDoubleClick: _react.PropTypes.func,
-	  onItemContextMenu: _react.PropTypes.func
+	  onItemContextMenu: _react.PropTypes.func,
+	
+	  selected: _react.PropTypes.array
 	};
-	Items.defaultProps = {};
+	Items.defaultProps = {
+	  selected: []
+	};
 	exports.default = Items;
 
 /***/ },
@@ -1929,7 +1954,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.stack = stack;
 	exports.nostack = nostack;
 	exports.keyBy = keyBy;
-	exports.groupBy = groupBy;
+	exports.getGroupedItems = getGroupedItems;
 	exports.hasSomeParentTheClass = hasSomeParentTheClass;
 	exports.createGradientPattern = createGradientPattern;
 	exports.deepObjectCompare = deepObjectCompare;
@@ -2152,15 +2177,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function stack(items, groupOrders, lineHeight, headerHeight, force) {
 	  var i, iMax;
-	
 	  var totalHeight = headerHeight;
 	
 	  var groupHeights = {};
 	  var groupTops = {};
 	
-	  var groupedItems = groupBy(items, function (item) {
-	    return item.dimensions.order;
-	  });
+	  var groupedItems = getGroupedItems(items, groupOrders);
 	
 	  if (force) {
 	    // reset top position of all items
@@ -2169,67 +2191,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	
-	  var _iteratorNormalCompletion = true;
-	  var _didIteratorError = false;
-	  var _iteratorError = undefined;
+	  groupedItems.forEach(function (group, index, array) {
+	    // calculate new, non-overlapping positions
+	    groupTops[index] = totalHeight;
 	
-	  try {
-	    for (var _iterator = Object.keys(groupOrders)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	      var url = _step.value;
+	    var groupHeight = 0;
+	    var verticalMargin = 0;
+	    for (i = 0, iMax = group.length; i < iMax; i++) {
+	      var item = group[i];
+	      verticalMargin = item.dimensions.lineHeight - item.dimensions.height;
 	
-	      var key = groupOrders[url];
-	      // calculate new, non-overlapping positions
-	      var group = groupedItems[key] || [];
-	
-	      groupTops[key] = totalHeight;
-	
-	      var groupHeight = 0;
-	      var verticalMargin = 0;
-	      for (i = 0, iMax = group.length; i < iMax; i++) {
-	        var item = group[i];
-	        verticalMargin = item.dimensions.lineHeight - item.dimensions.height;
-	
-	        if (item.dimensions.stack && item.dimensions.top === null) {
-	          item.dimensions.top = totalHeight + verticalMargin;
-	          groupHeight = Math.max(groupHeight, item.dimensions.lineHeight);
-	          do {
-	            var collidingItem = null;
-	            for (var j = 0, jj = group.length; j < jj; j++) {
-	              var other = group[j];
-	              if (other.top !== null && other !== item && other.dimensions.stack && collision(item.dimensions, other.dimensions, item.dimensions.lineHeight)) {
-	                collidingItem = other;
-	                break;
-	              } else {
-	                // console.log('dont test', other.top !== null, other !== item, other.stack);
-	              }
+	      if (item.dimensions.stack && item.dimensions.top === null) {
+	        item.dimensions.top = totalHeight + verticalMargin;
+	        groupHeight = Math.max(groupHeight, item.dimensions.lineHeight);
+	        do {
+	          var collidingItem = null;
+	          for (var j = 0, jj = group.length; j < jj; j++) {
+	            var other = group[j];
+	            if (other.top !== null && other !== item && other.dimensions.stack && collision(item.dimensions, other.dimensions, item.dimensions.lineHeight)) {
+	              collidingItem = other;
+	              break;
+	            } else {
+	              // console.log('dont test', other.top !== null, other !== item, other.stack);
 	            }
+	          }
 	
-	            if (collidingItem != null) {
-	              // There is a collision. Reposition the items above the colliding element
-	              item.dimensions.top = collidingItem.dimensions.top + collidingItem.dimensions.lineHeight;
-	              groupHeight = Math.max(groupHeight, item.dimensions.top + item.dimensions.height - totalHeight);
-	            }
-	          } while (collidingItem);
-	        }
-	      }
-	      groupHeights[key] = Math.max(groupHeight + verticalMargin, lineHeight);
-	      totalHeight += Math.max(groupHeight + verticalMargin, lineHeight);
-	    }
-	  } catch (err) {
-	    _didIteratorError = true;
-	    _iteratorError = err;
-	  } finally {
-	    try {
-	      if (!_iteratorNormalCompletion && _iterator.return) {
-	        _iterator.return();
-	      }
-	    } finally {
-	      if (_didIteratorError) {
-	        throw _iteratorError;
+	          if (collidingItem != null) {
+	            // There is a collision. Reposition the items above the colliding element
+	            item.dimensions.top = collidingItem.dimensions.top + collidingItem.dimensions.lineHeight;
+	            groupHeight = Math.max(groupHeight, item.dimensions.top + item.dimensions.height - totalHeight);
+	          }
+	        } while (collidingItem);
 	      }
 	    }
-	  }
-	
+	    groupHeights[index] = Math.max(groupHeight + verticalMargin, lineHeight);
+	    totalHeight += Math.max(groupHeight + verticalMargin, lineHeight);
+	  });
 	  return {
 	    height: totalHeight,
 	    groupHeights: groupHeights,
@@ -2245,9 +2242,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var groupHeights = {};
 	  var groupTops = {};
 	
-	  var groupedItems = groupBy(items, function (item) {
-	    return item.dimensions.order;
-	  });
+	  var groupedItems = getGroupedItems(items, groupOrders);
 	
 	  if (force) {
 	    // reset top position of all items
@@ -2256,48 +2251,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	
-	  var _iteratorNormalCompletion2 = true;
-	  var _didIteratorError2 = false;
-	  var _iteratorError2 = undefined;
+	  groupedItems.forEach(function (group, index, array) {
+	    // calculate new, non-overlapping positions
+	    groupTops[index] = totalHeight;
 	
-	  try {
-	    for (var _iterator2 = Object.keys(groupOrders)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	      var url = _step2.value;
+	    var groupHeight = 0;
+	    for (i = 0, iMax = group.length; i < iMax; i++) {
+	      var item = group[i];
+	      var verticalMargin = (item.dimensions.lineHeight - item.dimensions.height) / 2;
 	
-	      var key = groupOrders[url];
-	      // calculate new, non-overlapping positions
-	      var group = groupedItems[key] || [];
-	
-	      groupTops[key] = totalHeight;
-	
-	      var groupHeight = 0;
-	      for (i = 0, iMax = group.length; i < iMax; i++) {
-	        var item = group[i];
-	        var verticalMargin = (item.dimensions.lineHeight - item.dimensions.height) / 2;
-	
-	        if (item.dimensions.top === null) {
-	          item.dimensions.top = totalHeight + verticalMargin;
-	          groupHeight = Math.max(groupHeight, item.dimensions.lineHeight);
-	        }
-	      }
-	      groupHeights[key] = Math.max(groupHeight, lineHeight);
-	      totalHeight += Math.max(groupHeight, lineHeight);
-	    }
-	  } catch (err) {
-	    _didIteratorError2 = true;
-	    _iteratorError2 = err;
-	  } finally {
-	    try {
-	      if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	        _iterator2.return();
-	      }
-	    } finally {
-	      if (_didIteratorError2) {
-	        throw _iteratorError2;
+	      if (item.dimensions.top === null) {
+	        item.dimensions.top = totalHeight + verticalMargin;
+	        groupHeight = Math.max(groupHeight, item.dimensions.lineHeight);
 	      }
 	    }
-	  }
-	
+	    groupHeights[index] = Math.max(groupHeight, lineHeight);
+	    totalHeight += Math.max(groupHeight, lineHeight);
+	  });
 	  return {
 	    height: totalHeight,
 	    groupHeights: groupHeights,
@@ -2315,18 +2285,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return obj;
 	}
 	
-	function groupBy(collection, groupFunction) {
-	  var obj = {};
+	function getGroupedItems(items, groupOrders) {
+	  var arr = [];
 	
-	  collection.forEach(function (element, index, array) {
-	    var key = groupFunction(element);
-	    if (!obj[key]) {
-	      obj[key] = [];
-	    }
-	    obj[key].push(element);
-	  });
+	  // Initialize with empty arrays for each group
+	  for (var i = 0; i < Object.keys(groupOrders).length; i++) {
+	    arr[i] = [];
+	  }
+	  // Populate groups
+	  for (var i = 0; i < items.length; i++) {
+	    arr[items[i].dimensions.order].push(items[i]);
+	  }
 	
-	  return obj;
+	  return arr;
 	}
 	
 	function hasSomeParentTheClass(element, classname) {
