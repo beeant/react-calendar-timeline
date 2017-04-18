@@ -7,6 +7,10 @@ and this project adheres (more or less) to [Semantic Versioning](http://semver.o
 ## Unreleased
 When you submit a PR, add your changes here!
 
+## [2.0.0]
+### New version
+- Merged all open pull request and create new version of the plugin
+
 ## [0.12.0]
 ### Added
 - An option to add another sidebar to the right of the Timeline. @goooseman

@@ -1,7 +1,5 @@
 # React Calendar Timeline
 
-This is new version of the [react-calendar-timeline](https://github.com/namespace-ee/react-calendar-timeline). All open pull requests were merged. 
-
 A modern and responsive react timeline component.
 
 ![calendar demo](https://raw.githubusercontent.com/namespace-ee/react-calendar-timeline/master/doc/demo.gif)
@@ -11,14 +9,22 @@ Demo here: http://namespace.ee/react-calendar-timeline/
 ## Getting started
 
 ```
-npm install --save new-react-calendar-timeline
+# via yarn
+yarn add react-calendar-timeline
+
+# via npm
+npm install --save react-calendar-timeline
 ```
 
-`new-react-calendar-timeline` has `react`, `react-dom`, [`moment`](http://momentjs.com/) and [`interact.js`](http://interactjs.io/docs/) as peer dependencies.
+`react-calendar-timeline` has `react`, `react-dom`, [`moment`](http://momentjs.com/) and [`interact.js`](http://interactjs.io/docs/) as peer dependencies.
 
 You need to install them separately:
 
 ```
+# via yarn
+yarn add react react-dom # you probably already have these
+yarn add moment interact.js
+
 # via npm
 npm install --save react react-dom # you probably already have these
 npm install --save moment interact.js
