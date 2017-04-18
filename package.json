@@ -1,7 +1,7 @@
 {
-  "name": "react-calendar-timeline",
-  "version": "0.12.0",
-  "description": "react calendar timeline",
+  "name": "new-react-calendar-timeline",
+  "version": "2.0.0",
+  "description": "new react calendar timeline",
   "main": "modules/index.js",
   "scripts": {
     "clean": "rimraf -rf ./build",
@@ -21,14 +21,15 @@
     "info": "npm info react-calendar-timeline",
     "start": "./node_modules/.bin/webpack-dev-server --inline --hot --host 0.0.0.0"
   },
-  "homepage": "https://github.com/namespace-ee/react-calendar-timeline",
+  "homepage": "https://github.com/mkawczynski07/react-calendar-timeline",
   "repository": {
     "type": "git",
-    "url": "https://github.com/namespace-ee/react-calendar-timeline.git"
+    "url": "https://github.com/mkawczynski07/react-calendar-timeline.git"
   },
   "author": "Marius Andra <marius.andra@gmail.com>",
   "contributors": [
-    "Stanisław Chmiela <sjchmiela@gmail.com>"
+    "Stanisław Chmiela <sjchmiela@gmail.com>",
+	"Marek Kawczynski <mkawczynski07@gmail.com>"
   ],
   "license": "MIT",
   "keywords": [
