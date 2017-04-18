@@ -94,7 +94,9 @@ export default class ReactCalendarTimeline extends Component {
     onTimeInit: PropTypes.func,
     onBoundsChange: PropTypes.func,
 
-    children: PropTypes.node
+    children: PropTypes.node,
+
+    selected: PropTypes.array
   }
 
   static defaultProps = {
@@ -157,7 +159,9 @@ export default class ReactCalendarTimeline extends Component {
     onTimeInit: null,
     // called when the canvas area of the calendar changes
     onBoundsChange: null,
-    children: null
+    children: null,
+
+    selected: null
   }
 
   constructor (props) {
@@ -696,7 +700,8 @@ export default class ReactCalendarTimeline extends Component {
              onItemDoubleClick={this.props.onItemDoubleClick}
              onItemContextMenu={this.props.onItemContextMenu}
              itemResizing={this.resizingItem}
-             itemResized={this.resizedItem} />
+             itemResized={this.resizedItem}
+             selected={this.props.selected} />
     )
   }
 
