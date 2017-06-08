@@ -51,6 +51,7 @@ export default class Item extends Component {
       preDragPosition: null,
       dragTime: null,
       dragGroupDelta: null,
+      targetDragGroupDelta: null,
 
       resizing: null,
       resizeEdge: null,
@@ -211,9 +212,19 @@ export default class Item extends Component {
         if (this.state.dragging) {
           let dragTime = this.dragTime(e)
           let dragGroupDelta = this.dragGroupDelta(e)
+          let targetDragGroupDelta = dragGroupDelta
 
           if (this.props.moveGroupValidator) {
-            dragGroupDelta = this.props.moveGroupValidator(this.props.item, dragGroupDelta)
+            if (dragGroupDelta !== this.state.dragGroupDelta && dragGroupDelta !== this.state.targetDragGroupDelta) {
+              dragGroupDelta = this.props.moveGroupValidator(
+                this.props.item,
+                this.props.order + targetDragGroupDelta,
+                dragGroupDelta,
+                this.state.dragGroupDelta
+              )
+            } else if (dragGroupDelta === this.state.targetDragGroupDelta) {
+              dragGroupDelta = this.state.dragGroupDelta
+            }
           }
 
           if (this.props.moveResizeValidator) {
@@ -226,20 +237,15 @@ export default class Item extends Component {
 
           this.setState({
             dragTime: dragTime,
-            dragGroupDelta: dragGroupDelta
+            dragGroupDelta: dragGroupDelta,
+            targetDragGroupDelta: targetDragGroupDelta
           })
         }
       })
       .on('dragend', (e) => {
         if (this.state.dragging) {
           if (this.props.onDrop) {
-            let dragTime = this.dragTime(e)
-
-            if (this.props.moveResizeValidator) {
-              dragTime = this.props.moveResizeValidator('move', this.props.item, dragTime)
-            }
-
-            this.props.onDrop(this.itemId, dragTime, this.props.order + this.dragGroupDelta(e))
+            this.props.onDrop(this.itemId, this.state.dragTime, this.props.order + this.state.dragGroupDelta)
           }
 
           this.setState({
@@ -247,7 +253,8 @@ export default class Item extends Component {
             dragStart: null,
             preDragPosition: null,
             dragTime: null,
-            dragGroupDelta: null
+            dragGroupDelta: null,
+            targetDragGroupDelta: null
           })
         }
       })

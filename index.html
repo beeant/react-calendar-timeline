@@ -125,11 +125,9 @@
         return time
       },
 
-      moveGroupValidator: function(item, groupDelta) {
-        if (groupDelta !== 0) {
-          console.log('Changing group to ', groupDelta)
-        }
-        
+      moveGroupValidator: function(item, targetGroupOrder, groupDelta, previousGroupDelta) {
+        console.log(`Changing group of ${item.id} to `, targetGroupOrder)
+
         return groupDelta
       },
 
