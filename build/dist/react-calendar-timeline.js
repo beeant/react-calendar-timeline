@@ -339,8 +339,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          maxZoom = _props.maxZoom;
 	
 	      var oldZoom = this.state.visibleTimeEnd - this.state.visibleTimeStart;
-	      var newZoom = Math.min(Math.max(Math.round(oldZoom * scale), minZoom), maxZoom); // min 1 min, max 20 years
-	      var newVisibleTimeStart = Math.round(this.state.visibleTimeStart + (oldZoom - newZoom) * offset);
+	      var newZoom = Math.min(Math.max(Math.round(oldZoom * scale), minZoom), maxZoom // min 1 min, max 20 years
+	      );var newVisibleTimeStart = Math.round(this.state.visibleTimeStart + (oldZoom - newZoom) * offset);
 	
 	      this.props.onTimeChange.bind(this)(newVisibleTimeStart, newVisibleTimeStart + newZoom, this.updateScrollCanvas);
 	    }
@@ -428,6 +428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        useResizeHandle: this.props.useResizeHandle,
 	        canSelect: this.props.canSelect,
 	        moveResizeValidator: this.props.moveResizeValidator,
+	        moveGroupValidator: this.props.moveGroupValidator,
 	        topOffset: this.state.topOffset,
 	        itemSelect: this.selectItem,
 	        itemDrag: this.dragItem,
@@ -714,6 +715,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  onCanvasDoubleClick: _react.PropTypes.func,
 	
 	  moveResizeValidator: _react.PropTypes.func,
+	  moveGroupValidator: _react.PropTypes.func,
 	
 	  dayBackground: _react.PropTypes.func,
 	
@@ -772,6 +774,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  onItemContextMenu: null,
 	
 	  moveResizeValidator: null,
+	  moveGroupValidator: null,
 	
 	  dayBackground: null,
 	
@@ -1343,6 +1346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            onResizing: _this2.props.itemResizing,
 	            onResized: _this2.props.itemResized,
 	            moveResizeValidator: _this2.props.moveResizeValidator,
+	            moveGroupValidator: _this2.props.moveGroupValidator,
 	            onDrag: _this2.props.itemDrag,
 	            onDrop: _this2.props.itemDrop,
 	            onItemDoubleClick: _this2.props.onItemDoubleClick,
@@ -1377,6 +1381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  keys: _react.PropTypes.object.isRequired,
 	
 	  moveResizeValidator: _react.PropTypes.func,
+	  moveGroupValidator: _react.PropTypes.func,
 	  itemSelect: _react.PropTypes.func,
 	  itemDrag: _react.PropTypes.func,
 	  itemDrop: _react.PropTypes.func,
@@ -1494,6 +1499,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      preDragPosition: null,
 	      dragTime: null,
 	      dragGroupDelta: null,
+	      targetDragGroupDelta: null,
 	
 	      resizing: null,
 	      resizeEdge: null,
@@ -1669,6 +1675,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (_this2.state.dragging) {
 	          var dragTime = _this2.dragTime(e);
 	          var dragGroupDelta = _this2.dragGroupDelta(e);
+	          var targetDragGroupDelta = dragGroupDelta;
+	
+	          if (_this2.props.moveGroupValidator) {
+	            if (dragGroupDelta !== _this2.state.dragGroupDelta && dragGroupDelta !== _this2.state.targetDragGroupDelta) {
+	              dragGroupDelta = _this2.props.moveGroupValidator(_this2.props.item, _this2.props.order + targetDragGroupDelta, dragGroupDelta, _this2.state.dragGroupDelta);
+	            } else if (dragGroupDelta === _this2.state.targetDragGroupDelta) {
+	              dragGroupDelta = _this2.state.dragGroupDelta;
+	            }
+	          }
 	
 	          if (_this2.props.moveResizeValidator) {
 	            dragTime = _this2.props.moveResizeValidator('move', _this2.props.item, dragTime);
@@ -1680,19 +1695,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	          _this2.setState({
 	            dragTime: dragTime,
-	            dragGroupDelta: dragGroupDelta
+	            dragGroupDelta: dragGroupDelta,
+	            targetDragGroupDelta: targetDragGroupDelta
 	          });
 	        }
 	      }).on('dragend', function (e) {
 	        if (_this2.state.dragging) {
 	          if (_this2.props.onDrop) {
-	            var dragTime = _this2.dragTime(e);
-	
-	            if (_this2.props.moveResizeValidator) {
-	              dragTime = _this2.props.moveResizeValidator('move', _this2.props.item, dragTime);
-	            }
-	
-	            _this2.props.onDrop(_this2.itemId, dragTime, _this2.props.order + _this2.dragGroupDelta(e));
+	            _this2.props.onDrop(_this2.itemId, _this2.state.dragTime, _this2.props.order + _this2.state.dragGroupDelta);
 	          }
 	
 	          _this2.setState({
@@ -1700,7 +1710,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            dragStart: null,
 	            preDragPosition: null,
 	            dragTime: null,
-	            dragGroupDelta: null
+	            dragGroupDelta: null,
+	            targetDragGroupDelta: null
 	          });
 	        }
 	      }).on('resizestart', function (e) {
