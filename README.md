@@ -1,6 +1,6 @@
 # React Calendar Timeline
 
-This is new version of the [react-calendar-timeline](https://github.com/namespace-ee/react-calendar-timeline). All open pull requests were merged. 
+This is new version of the [react-calendar-timeline](https://github.com/namespace-ee/react-calendar-timeline). All open pull requests were merged.
 
 A modern and responsive react timeline component.
 
@@ -70,7 +70,7 @@ Expects either a vanilla JS array or an immutableJS array, consisting of objects
 }
 ```
 
-If you use right sidebar, you can pass `right_sidebar` optional property here. 
+If you use right sidebar, you can pass `right_sidebar` optional property here.
 
 ### items
 Expects either a vanilla JS array or an immutableJS array, consisting of objects with the following attributes:
@@ -94,7 +94,7 @@ Expects either a vanilla JS array or an immutableJS array, consisting of objects
 The preferred (fastest) option is to give unix timestamps in milliseconds for `start_time` and `end_time`. Objects that convert to them (java Date or moment()) will also work, but will be a lot slower.
 
 ### selected
-An array with id's corresponding to id's in items (`item.id`). If this prop is set you have to manage the selected items yourself within the `onItemSelect` handler to update the property with new id's. This overwrites the default behaviour of selecting one item on click. 
+An array with id's corresponding to id's in items (`item.id`). If this prop is set you have to manage the selected items yourself within the `onItemSelect` handler to update the property with new id's. This overwrites the default behaviour of selecting one item on click.
 
 ### keys
 An array specifying keys in the `items` and `groups` objects. Defaults to
@@ -248,6 +248,41 @@ function (action, item, time, resizeEdge) {
   }
 
   return time
+}
+```
+
+### moveGroupValidator(item, targetGroupOrder, groupDelta, previousGroupDelta) ###
+This function is called when an item jumps to a new group when moved. It's up to this function to return a new version of `groupDelta` when the proposed group jump would violate business logic.
+
+The argument `item` represents the object of the item that is being moved.
+
+The argument `targetGroupOrder` is an index of the target group, a group into which the items is being moved.
+
+The argument `groupDelta` represents the change in group index. The change is between the item's original group index and the target group index, into which the item is being moved.
+
+The argument `previousGroupDelta` represents the change in group index from *right before the jump*. In other words, it is an indicator from where the item jumps.
+
+For example, let's assume that our business logic is that item with ID of 5 shouldn't move to third group on our list. When the user attempts moving to group 3, we want to block this action and keep the item in its previous group. This is where the `previousGroupDelta` will be useful - we can return this value to tell the item to stay in the previous group.
+
+```js
+function (item, targetGroupOrder, groupDelta, previousGroupDelta) {
+  if (item.id === 5 && targetGroupOrder === 2) {
+    return previousGroupDelta;
+  }
+
+  return groupDelta;
+}
+```
+
+Another example would be a situation where we don't want any item to jump more than three neighbouring groups.
+
+```js
+function (item, targetGroupOrder, groupDelta, previousGroupDelta) {
+  if (groupDelta > 3 || groupDelta < -3) {
+    return previousGroupDelta;
+  }
+
+  return groupDelta;
 }
 ```
 
