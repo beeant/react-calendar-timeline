@@ -125,6 +125,14 @@
         return time
       },
 
+      moveGroupValidator: function(item, groupDelta) {
+        if (groupDelta !== 0) {
+          console.log('Changing group to ', groupDelta)
+        }
+        
+        return groupDelta
+      },
+
       // this limits the timeline to -6 months ... +6 months
       onTimeChange: function (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) {
         if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {

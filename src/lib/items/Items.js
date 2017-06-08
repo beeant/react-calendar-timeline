@@ -36,6 +36,7 @@ export default class Items extends Component {
     keys: PropTypes.object.isRequired,
 
     moveResizeValidator: PropTypes.func,
+    moveGroupValidator: PropTypes.func,
     itemSelect: PropTypes.func,
     itemDrag: PropTypes.func,
     itemDrop: PropTypes.func,
@@ -137,6 +138,7 @@ export default class Items extends Component {
                                         onResizing={this.props.itemResizing}
                                         onResized={this.props.itemResized}
                                         moveResizeValidator={this.props.moveResizeValidator}
+                                        moveGroupValidator={this.props.moveGroupValidator}
                                         onDrag={this.props.itemDrag}
                                         onDrop={this.props.itemDrop}
                                         onItemDoubleClick={this.props.onItemDoubleClick}

@@ -77,6 +77,7 @@ export default class ReactCalendarTimeline extends Component {
     onCanvasDoubleClick: PropTypes.func,
 
     moveResizeValidator: PropTypes.func,
+    moveGroupValidator: PropTypes.func,
 
     dayBackground: PropTypes.func,
 
@@ -136,6 +137,7 @@ export default class ReactCalendarTimeline extends Component {
     onItemContextMenu: null,
 
     moveResizeValidator: null,
+    moveGroupValidator: null,
 
     dayBackground: null,
 
@@ -374,10 +376,10 @@ export default class ReactCalendarTimeline extends Component {
     if (items !== this.props.items || groups !== this.props.groups) {
       this.updateDimensions(items, groups)
     }
-    
+
     if (sidebarWidth && items && groups) {
       this.resize(nextProps)
-    } 
+    }
   }
 
   updateDimensions (items, groups) {
@@ -693,6 +695,7 @@ export default class ReactCalendarTimeline extends Component {
              useResizeHandle={this.props.useResizeHandle}
              canSelect={this.props.canSelect}
              moveResizeValidator={this.props.moveResizeValidator}
+             moveGroupValidator={this.props.moveGroupValidator}
              topOffset={this.state.topOffset}
              itemSelect={this.selectItem}
              itemDrag={this.dragItem}
