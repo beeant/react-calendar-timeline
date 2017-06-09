@@ -228,7 +228,7 @@ export default class Item extends Component {
           }
 
           if (this.props.moveResizeValidator) {
-            dragTime = this.props.moveResizeValidator('move', this.props.item, dragTime)
+            dragTime = this.props.moveResizeValidator('move', this.props.item, dragTime, this.props.order + dragGroupDelta)
           }
 
           if (this.props.onDrag) {
