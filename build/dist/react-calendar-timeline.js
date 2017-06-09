@@ -1686,7 +1686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	
 	          if (_this2.props.moveResizeValidator) {
-	            dragTime = _this2.props.moveResizeValidator('move', _this2.props.item, dragTime);
+	            dragTime = _this2.props.moveResizeValidator('move', _this2.props.item, dragTime, _this2.props.order + dragGroupDelta);
 	          }
 	
 	          if (_this2.props.onDrag) {
