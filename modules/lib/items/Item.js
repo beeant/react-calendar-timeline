@@ -95,6 +95,7 @@ var Item = function (_Component) {
       preDragPosition: null,
       dragTime: null,
       dragGroupDelta: null,
+      targetDragGroupDelta: null,
 
       resizing: null,
       resizeEdge: null,
@@ -270,6 +271,15 @@ var Item = function (_Component) {
         if (_this2.state.dragging) {
           var dragTime = _this2.dragTime(e);
           var dragGroupDelta = _this2.dragGroupDelta(e);
+          var targetDragGroupDelta = dragGroupDelta;
+
+          if (_this2.props.moveGroupValidator) {
+            if (dragGroupDelta !== _this2.state.dragGroupDelta && dragGroupDelta !== _this2.state.targetDragGroupDelta) {
+              dragGroupDelta = _this2.props.moveGroupValidator(_this2.props.item, _this2.props.order + targetDragGroupDelta, dragGroupDelta, _this2.state.dragGroupDelta);
+            } else if (dragGroupDelta === _this2.state.targetDragGroupDelta) {
+              dragGroupDelta = _this2.state.dragGroupDelta;
+            }
+          }
 
           if (_this2.props.moveResizeValidator) {
             dragTime = _this2.props.moveResizeValidator('move', _this2.props.item, dragTime);
@@ -281,19 +291,14 @@ var Item = function (_Component) {
 
           _this2.setState({
             dragTime: dragTime,
-            dragGroupDelta: dragGroupDelta
+            dragGroupDelta: dragGroupDelta,
+            targetDragGroupDelta: targetDragGroupDelta
           });
         }
       }).on('dragend', function (e) {
         if (_this2.state.dragging) {
           if (_this2.props.onDrop) {
-            var dragTime = _this2.dragTime(e);
-
-            if (_this2.props.moveResizeValidator) {
-              dragTime = _this2.props.moveResizeValidator('move', _this2.props.item, dragTime);
-            }
-
-            _this2.props.onDrop(_this2.itemId, dragTime, _this2.props.order + _this2.dragGroupDelta(e));
+            _this2.props.onDrop(_this2.itemId, _this2.state.dragTime, _this2.props.order + _this2.state.dragGroupDelta);
           }
 
           _this2.setState({
@@ -301,7 +306,8 @@ var Item = function (_Component) {
             dragStart: null,
             preDragPosition: null,
             dragTime: null,
-            dragGroupDelta: null
+            dragGroupDelta: null,
+            targetDragGroupDelta: null
           });
         }
       }).on('resizestart', function (e) {

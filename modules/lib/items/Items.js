@@ -47,7 +47,7 @@ var Items = function (_Component) {
   _createClass(Items, [{
     key: 'shouldComponentUpdate',
     value: function shouldComponentUpdate(nextProps, nextState) {
-      return !((0, _utils.arraysEqual)(nextProps.groups, this.props.groups) && (0, _utils.arraysEqual)(nextProps.items, this.props.items) && nextProps.keys === this.props.keys && nextProps.canvasTimeStart === this.props.canvasTimeStart && nextProps.canvasTimeEnd === this.props.canvasTimeEnd && nextProps.canvasWidth === this.props.canvasWidth && nextProps.selectedItem === this.props.selectedItem && nextProps.lineHeight === this.props.lineHeight && nextProps.dragSnap === this.props.dragSnap && nextProps.minResizeWidth === this.props.minResizeWidth && nextProps.canChangeGroup === this.props.canChangeGroup && nextProps.canMove === this.props.canMove && nextProps.canResize === this.props.canResize && nextProps.canSelect === this.props.canSelect && nextProps.dimensionItems === this.props.dimensionItems && nextProps.topOffset === this.props.topOffset);
+      return !((0, _utils.arraysEqual)(nextProps.groups, this.props.groups) && (0, _utils.arraysEqual)(nextProps.items, this.props.items) && nextProps.keys === this.props.keys && nextProps.canvasTimeStart === this.props.canvasTimeStart && nextProps.canvasTimeEnd === this.props.canvasTimeEnd && nextProps.canvasWidth === this.props.canvasWidth && nextProps.selectedItem === this.props.selectedItem && nextProps.selected === this.props.selected && nextProps.lineHeight === this.props.lineHeight && nextProps.dragSnap === this.props.dragSnap && nextProps.minResizeWidth === this.props.minResizeWidth && nextProps.canChangeGroup === this.props.canChangeGroup && nextProps.canMove === this.props.canMove && nextProps.canResize === this.props.canResize && nextProps.canSelect === this.props.canSelect && nextProps.dimensionItems === this.props.dimensionItems && nextProps.topOffset === this.props.topOffset);
     }
   }, {
     key: 'getGroupOrders',
@@ -62,6 +62,18 @@ var Items = function (_Component) {
       }
 
       return groupOrders;
+    }
+  }, {
+    key: 'isSelected',
+    value: function isSelected(item, itemIdKey) {
+      if (!this.props.selected) {
+        return this.props.selectedItem === (0, _utils._get)(item, itemIdKey);
+      } else {
+        var target = (0, _utils._get)(item, itemIdKey);
+        return this.props.selected.find(function (value) {
+          return value === target;
+        });
+      }
     }
   }, {
     key: 'getVisibleItems',
@@ -104,7 +116,7 @@ var Items = function (_Component) {
             keys: _this2.props.keys,
             order: groupOrders[(0, _utils._get)(item, itemGroupKey)],
             dimensions: sortedDimensionItems[(0, _utils._get)(item, itemIdKey)].dimensions,
-            selected: _this2.props.selectedItem === (0, _utils._get)(item, itemIdKey),
+            selected: _this2.isSelected(item, itemIdKey),
             canChangeGroup: (0, _utils._get)(item, 'canChangeGroup') !== undefined ? (0, _utils._get)(item, 'canChangeGroup') : _this2.props.canChangeGroup,
             canMove: (0, _utils._get)(item, 'canMove') !== undefined ? (0, _utils._get)(item, 'canMove') : _this2.props.canMove,
             canResizeLeft: canResizeLeft(item, _this2.props.canResize),
@@ -123,6 +135,7 @@ var Items = function (_Component) {
             onResizing: _this2.props.itemResizing,
             onResized: _this2.props.itemResized,
             moveResizeValidator: _this2.props.moveResizeValidator,
+            moveGroupValidator: _this2.props.moveGroupValidator,
             onDrag: _this2.props.itemDrag,
             onDrop: _this2.props.itemDrop,
             onItemDoubleClick: _this2.props.onItemDoubleClick,
@@ -157,6 +170,7 @@ Items.propTypes = {
   keys: _react.PropTypes.object.isRequired,
 
   moveResizeValidator: _react.PropTypes.func,
+  moveGroupValidator: _react.PropTypes.func,
   itemSelect: _react.PropTypes.func,
   itemDrag: _react.PropTypes.func,
   itemDrop: _react.PropTypes.func,
@@ -164,7 +178,11 @@ Items.propTypes = {
   itemResized: _react.PropTypes.func,
 
   onItemDoubleClick: _react.PropTypes.func,
-  onItemContextMenu: _react.PropTypes.func
+  onItemContextMenu: _react.PropTypes.func,
+
+  selected: _react.PropTypes.array
 };
-Items.defaultProps = {};
+Items.defaultProps = {
+  selected: []
+};
 exports.default = Items;

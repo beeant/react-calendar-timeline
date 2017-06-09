@@ -151,11 +151,11 @@ var ReactCalendarTimeline = function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      this.resize();
+      this.resize(this.props);
 
       this.resizeEventListener = {
         handleEvent: function handleEvent(event) {
-          _this2.resize();
+          _this2.resize(_this2.props);
         }
       };
 
@@ -177,15 +177,14 @@ var ReactCalendarTimeline = function (_Component) {
     }
   }, {
     key: 'resize',
-    value: function resize() {
-      // FIXME currently when the component creates a scroll the scrollbar is not used in the initial width calculation, resizing fixes this
+    value: function resize(props) {
       var _refs$container$getBo = this.refs.container.getBoundingClientRect(),
           containerWidth = _refs$container$getBo.width,
           containerTop = _refs$container$getBo.top;
 
-      var width = containerWidth - this.props.sidebarWidth - this.props.rightSidebarWidth;
+      var width = containerWidth - props.sidebarWidth - props.rightSidebarWidth;
 
-      var _stackItems = this.stackItems(this.props.items, this.props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width),
+      var _stackItems = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width),
           dimensionItems = _stackItems.dimensionItems,
           height = _stackItems.height,
           groupHeights = _stackItems.groupHeights,
@@ -207,7 +206,8 @@ var ReactCalendarTimeline = function (_Component) {
       var visibleTimeStart = nextProps.visibleTimeStart,
           visibleTimeEnd = nextProps.visibleTimeEnd,
           items = nextProps.items,
-          groups = nextProps.groups;
+          groups = nextProps.groups,
+          sidebarWidth = nextProps.sidebarWidth;
 
 
       if (visibleTimeStart && visibleTimeEnd) {
@@ -216,6 +216,10 @@ var ReactCalendarTimeline = function (_Component) {
 
       if (items !== this.props.items || groups !== this.props.groups) {
         this.updateDimensions(items, groups);
+      }
+
+      if (sidebarWidth && items && groups) {
+        this.resize(nextProps);
       }
     }
   }, {
@@ -261,8 +265,8 @@ var ReactCalendarTimeline = function (_Component) {
           maxZoom = _props.maxZoom;
 
       var oldZoom = this.state.visibleTimeEnd - this.state.visibleTimeStart;
-      var newZoom = Math.min(Math.max(Math.round(oldZoom * scale), minZoom), maxZoom); // min 1 min, max 20 years
-      var newVisibleTimeStart = Math.round(this.state.visibleTimeStart + (oldZoom - newZoom) * offset);
+      var newZoom = Math.min(Math.max(Math.round(oldZoom * scale), minZoom), maxZoom // min 1 min, max 20 years
+      );var newVisibleTimeStart = Math.round(this.state.visibleTimeStart + (oldZoom - newZoom) * offset);
 
       this.props.onTimeChange.bind(this)(newVisibleTimeStart, newVisibleTimeStart + newZoom, this.updateScrollCanvas);
     }
@@ -350,6 +354,7 @@ var ReactCalendarTimeline = function (_Component) {
         useResizeHandle: this.props.useResizeHandle,
         canSelect: this.props.canSelect,
         moveResizeValidator: this.props.moveResizeValidator,
+        moveGroupValidator: this.props.moveGroupValidator,
         topOffset: this.state.topOffset,
         itemSelect: this.selectItem,
         itemDrag: this.dragItem,
@@ -357,7 +362,8 @@ var ReactCalendarTimeline = function (_Component) {
         onItemDoubleClick: this.props.onItemDoubleClick,
         onItemContextMenu: this.props.onItemContextMenu,
         itemResizing: this.resizingItem,
-        itemResized: this.resizedItem });
+        itemResized: this.resizedItem,
+        selected: this.props.selected });
     }
   }, {
     key: 'infoLabel',
@@ -635,6 +641,7 @@ ReactCalendarTimeline.propTypes = {
   onCanvasDoubleClick: _react.PropTypes.func,
 
   moveResizeValidator: _react.PropTypes.func,
+  moveGroupValidator: _react.PropTypes.func,
 
   dayBackground: _react.PropTypes.func,
 
@@ -652,7 +659,9 @@ ReactCalendarTimeline.propTypes = {
   onTimeInit: _react.PropTypes.func,
   onBoundsChange: _react.PropTypes.func,
 
-  children: _react.PropTypes.node
+  children: _react.PropTypes.node,
+
+  selected: _react.PropTypes.array
 };
 ReactCalendarTimeline.defaultProps = {
   sidebarWidth: 150,
@@ -691,6 +700,7 @@ ReactCalendarTimeline.defaultProps = {
   onItemContextMenu: null,
 
   moveResizeValidator: null,
+  moveGroupValidator: null,
 
   dayBackground: null,
 
@@ -714,7 +724,9 @@ ReactCalendarTimeline.defaultProps = {
   onTimeInit: null,
   // called when the canvas area of the calendar changes
   onBoundsChange: null,
-  children: null
+  children: null,
+
+  selected: null
 };
 
 var _initialiseProps = function _initialiseProps() {
