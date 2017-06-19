@@ -321,20 +321,20 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   resize (props) {
-    const {width: containerWidth, top: containerTop} = this.refs.container.getBoundingClientRect()
-    let width = containerWidth - props.sidebarWidth - props.rightSidebarWidth;
+      const {width: containerWidth, top: containerTop} = this.refs.container.getBoundingClientRect()
+        let width = containerWidth - props.sidebarWidth - props.rightSidebarWidth;
 
-    const {
-      dimensionItems, height, groupHeights, groupTops
-    } = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width)
+      const {
+        dimensionItems, height, groupHeights, groupTops
+      } = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width)
 
     this.setState({
-      width: width,
-      topOffset: containerTop + window.pageYOffset,
-      dimensionItems: dimensionItems,
-      height: height,
-      groupHeights: groupHeights,
-      groupTops: groupTops
+        width: width,
+        topOffset: containerTop + window.pageYOffset,
+        dimensionItems: dimensionItems,
+        height: height,
+        groupHeights: groupHeights,
+        groupTops: groupTops
     })
     this.refs.scrollComponent.scrollLeft = width
   }
@@ -376,9 +376,9 @@ export default class ReactCalendarTimeline extends Component {
     if (items !== this.props.items || groups !== this.props.groups) {
       this.updateDimensions(items, groups)
     }
-
+    
     if (sidebarWidth && items && groups) {
-      this.resize(nextProps)
+      setTimeout(() => this.resize(nextProps));
     }
   }
 
