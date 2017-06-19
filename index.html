@@ -62,8 +62,8 @@
     var maxTime = moment().add(6, 'months').valueOf()
 
     var props = {
-      groups: groups,
-      items: items,
+      groups: [],
+      items: [],
       fixedHeader: 'fixed',
       fullUpdate: true,
 
@@ -146,9 +146,14 @@
     }
 
     var filter = React.createElement("div", {}, "The filter");
-
+    
     /* jshint undef:false */
     ReactDOM.render(React.createElement(ReactCalendarTimeline['default'], props, filter), document.getElementById('main'));
+    
+    setTimeout(function(){
+        var newProps = Object.assign({}, props, {groups: groups, items: items});
+        ReactDOM.render(React.createElement(ReactCalendarTimeline['default'], newProps, filter), document.getElementById('main'));
+    }, 1000);
   </script>
 </body>
 </html>
