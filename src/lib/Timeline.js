@@ -439,12 +439,12 @@ export default class ReactCalendarTimeline extends Component {
     } = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width)
 
     this.setState({
-        width: width,
-        topOffset: containerTop + window.pageYOffset,
-        dimensionItems: dimensionItems,
-        height: height,
-        groupHeights: groupHeights,
-        groupTops: groupTops
+      width: width,
+      topOffset: containerTop + window.pageYOffset,
+      dimensionItems: dimensionItems,
+      height: height,
+      groupHeights: groupHeights,
+      groupTops: groupTops
     })
     this.refs.scrollComponent.scrollLeft = width
   }
