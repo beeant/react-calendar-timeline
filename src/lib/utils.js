@@ -149,7 +149,7 @@ export function calculateDimensions ({ item, order, keys, canvasTimeStart, canva
     width: Math.max(w * ratio, 3),
     height: h,
     order: isDragging ? newGroupOrder : order,
-    stack: true,
+    stack: !item.isOverlay,
     collisionLeft: collisionX,
     originalLeft: itemTimeStart,
     collisionWidth: collisionW,
@@ -224,7 +224,7 @@ export function stack (items, groupOrders, lineHeight, headerHeight, force) {
           var collidingItem = null
           for (var j = 0, jj = group.length; j < jj; j++) {
             var other = group[j]
-            if (other.top !== null && other !== item && other.dimensions.stack && collision(item.dimensions, other.dimensions, item.dimensions.lineHeight)) {
+            if (other.dimensions.top !== null && other !== item && other.dimensions.stack && collision(item.dimensions, other.dimensions, item.dimensions.lineHeight)) {
               collidingItem = other
               break
             } else {
@@ -305,12 +305,14 @@ export function getGroupedItems(items, groupOrders) {
   var arr = []
 
   // Initialize with empty arrays for each group
-  for(var i = 0; i < Object.keys(groupOrders).length; i++) {
+  for (let i = 0; i < Object.keys(groupOrders).length; i++) {
     arr[i] = []
   }
   // Populate groups
-  for(var i = 0; i < items.length; i++) {
-    arr[items[i].dimensions.order].push(items[i])
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].dimensions.order !== undefined) {
+      arr[items[i].dimensions.order].push(items[i])
+    }
   }
 
   return arr
@@ -319,36 +321,6 @@ export function getGroupedItems(items, groupOrders) {
 export function hasSomeParentTheClass (element, classname) {
   if (element.className && element.className.split(' ').indexOf(classname) >= 0) return true
   return element.parentNode && hasSomeParentTheClass(element.parentNode, classname)
-}
-
-export function createGradientPattern (lineHeight, color1, color2, borderColor) {
-  if (borderColor) {
-    if (!color2 || color1 === color2) {
-      return 'repeating-linear-gradient(to bottom, ' +
-                    `${color1},` +
-                    `${color1} ${lineHeight - 1}px,` +
-                    `${borderColor} ${lineHeight - 1}px,` +
-                    `${borderColor} ${lineHeight}px` +
-              ')'
-    } else {
-      return 'repeating-linear-gradient(to bottom, ' +
-                    `${color1},` +
-                    `${color1} ${lineHeight - 1}px,` +
-                    `${borderColor} ${lineHeight - 1}px,` +
-                    `${borderColor} ${lineHeight}px,` +
-                    `${color2} ${lineHeight}px,` +
-                    `${color2} ${lineHeight * 2 - 1}px,` +
-                    `${borderColor} ${lineHeight * 2 - 1}px,` +
-                    `${borderColor} ${lineHeight * 2}px` +
-              ')'
-    }
-  } else {
-    if (!color2 || color1 === color2) {
-      return color1
-    } else {
-      return `repeating-linear-gradient(to bottom,${color1},${color1} ${lineHeight}px,${color2} ${lineHeight}px,${color2} ${lineHeight * 2}px)`
-    }
-  }
 }
 
 export function deepObjectCompare (obj1, obj2) {

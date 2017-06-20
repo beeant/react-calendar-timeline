@@ -12,8 +12,38 @@ When you submit a PR, add your changes here!
 - Merged all open pull request and create new version of the plugin
 
 ## [0.12.0]
+
+## [0.14.2]
+### Changed
+- Use `prop-types` instead of `React.PropTypes` to support React 15.5+. @mariusandra #110
+
+## [0.14.0]
 ### Added
-- An option to add another sidebar to the right of the Timeline. @goooseman
+- Use `headerLabelFormats` and `subHeaderLabelFormats` to customise the header labels. @Slowyn #68
+- Optional pluggable `resizeDetector` to detect when the element's container is resized. @Ziller321 #94
+
+### Fixed
+- Fix renders with empty `groups` array. @signalwerk #106
+
+## [0.13.0]
+### Added
+- An option to add another sidebar to the right of the Timeline. @goooseman #80
+- `itemRenderer` prop to allow specifying a custom component to render the items @nicocrm #103
+- `groupRenderer` prop to allow specifying a custom component to render the groups @nicocrm #103
+- `showCursorLine` prop to show a vertical line at the snap position @meikoudras
+- You can now select multiple items if you take control of the `selected` prop and the `onItemSelect` handler. @meengit #71
+- Canvas context menu handler `onCanvasContextMenu` @meikoudras
+
+### Fixed
+- Calculate width when we receive sidebar width property @jmerriweather #75
+- Avoid updating updateDimensions right after updateScrollCanvas @nicocrm #87
+- Fix typo collision detection in stack() @nicocrm #96
+- Remove dead code @signalwerk #101
+- Disable cursor style by interactjs @bkniffler #89
+- Fixed header width and Header label weekday support @meikoudras #66
+
+### Changed
+- [Deprecated] To have content above the left sidebar, pass it in a `sidebarContent={<div />}` prop, not as children to the component.
 
 ## [0.11.1]
 ### Fixed
@@ -50,3 +80,6 @@ When you submit a PR, add your changes here!
 [0.10.1]: https://github.com/namespace-ee/react-calendar-timeline/compare/v0.10.0...v0.10.1
 [0.11.0]: https://github.com/namespace-ee/react-calendar-timeline/compare/v0.10.1...v0.11.0
 [0.11.1]: https://github.com/namespace-ee/react-calendar-timeline/compare/v0.11.0...v0.11.1
+[0.13.0]: https://github.com/namespace-ee/react-calendar-timeline/compare/v0.11.1...v0.13.0
+[0.14.0]: https://github.com/namespace-ee/react-calendar-timeline/compare/v0.13.0...v0.14.0
+[0.14.2]: https://github.com/namespace-ee/react-calendar-timeline/compare/7483bbdf7d44de56a4576d64544631ea05be77cc...9a04baaffc87be993e9248d005790e4b11b80c4a

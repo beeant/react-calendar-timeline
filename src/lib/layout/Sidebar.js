@@ -1,8 +1,28 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import { _get, arraysEqual } from '../utils'
 
 export default class Sidebar extends Component {
+  static propTypes = {
+    groups: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
+    width: PropTypes.number.isRequired,
+    lineHeight: PropTypes.number.isRequired,
+    zIndex: PropTypes.number,
+    fixedHeader: PropTypes.oneOf(['fixed', 'absolute', 'none']),
+    keys: PropTypes.object.isRequired,
+    groupRenderer: PropTypes.func,
+    children: PropTypes.node,
+    isRightSidebar: PropTypes.bool
+  }
+
+  static defaultProps = {
+    fixedHeader: 'none',
+    zIndex: 12,
+    children: null,
+    isRightSidebar: false
+  }
+
   constructor (props) {
     super(props)
     this.state = {
@@ -63,12 +83,20 @@ export default class Sidebar extends Component {
     this.setComponentTop()
   }
 
+  renderGroupContent (group, isRightSidebar, groupTitleKey, groupRightTitleKey) {
+    if (this.props.groupRenderer) {
+      return React.createElement(this.props.groupRenderer, { group, isRightSidebar })
+    } else {
+      return _get(group, isRightSidebar ? groupRightTitleKey : groupTitleKey)
+    }
+  }
+
   render () {
     const {
       fixedHeader, width, lineHeight, zIndex, groupHeights, height, headerHeight, isRightSidebar
     } = this.props
 
-    const {groupIdKey, groupTitleKey, groupRightSidebarKey} = this.props.keys
+    const {groupIdKey, groupTitleKey, groupRightTitleKey} = this.props.keys
 
     const {
       scrollTop
@@ -118,7 +146,7 @@ export default class Sidebar extends Component {
 
       groupLines.push(
         <div key={_get(group, groupIdKey)} className={'rct-sidebar-row' + (i % 2 === 0 ? ' rct-sidebar-row-even' : ' rct-sidebar-row-odd')} style={elementStyle}>
-          {_get(group, (isRightSidebar ? groupRightSidebarKey : groupTitleKey))}
+          {this.renderGroupContent(group, isRightSidebar, groupTitleKey, groupRightTitleKey)}
         </div>
       )
       i += 1
@@ -133,21 +161,4 @@ export default class Sidebar extends Component {
       </div>
     )
   }
-}
-
-Sidebar.propTypes = {
-  groups: React.PropTypes.oneOfType([React.PropTypes.array, React.PropTypes.object]).isRequired,
-  width: React.PropTypes.number.isRequired,
-  lineHeight: React.PropTypes.number.isRequired,
-  zIndex: React.PropTypes.number,
-  fixedHeader: React.PropTypes.oneOf(['fixed', 'absolute', 'none']),
-  keys: React.PropTypes.object.isRequired,
-  children: React.PropTypes.node,
-  isRightSidebar: React.PropTypes.bool
-}
-Sidebar.defaultProps = {
-  fixedHeader: 'none',
-  zIndex: 12,
-  children: null,
-  isRightSidebar: false
 }
