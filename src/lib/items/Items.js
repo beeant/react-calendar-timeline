@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import Item from './Item'
 // import ItemGroup from './ItemGroup'
 
@@ -46,6 +47,7 @@ export default class Items extends Component {
     onItemDoubleClick: PropTypes.func,
     onItemContextMenu: PropTypes.func,
 
+    itemRenderer: PropTypes.func,
     selected: PropTypes.array
   }
 
@@ -143,7 +145,8 @@ export default class Items extends Component {
                                         onDrop={this.props.itemDrop}
                                         onItemDoubleClick={this.props.onItemDoubleClick}
                                         onContextMenu={this.props.onItemContextMenu}
-                                        onSelect={this.props.itemSelect}/>)}
+                                        onSelect={this.props.itemSelect}
+                                        itemRenderer={this.props.itemRenderer} />)}
       </div>
     )
   }

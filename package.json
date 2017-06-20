@@ -2,20 +2,24 @@
   "name": "new-react-calendar-timeline",
   "version": "2.0.9",
   "description": "new react calendar timeline",
-  "main": "modules/index.js",
+  "main": "lib/index.js",
+  "jsnext:main": "src/index.js",
   "scripts": {
-    "clean": "rimraf -rf ./build",
-    "watch": "npm run clean && node scripts/watch.js",
-    "build": "npm run clean && npm run build:dev && npm run build:prod",
-    "build:dev": "echo 'DEV - BUILD' && webpack --config webpack.config.js",
-    "build:prod": "echo 'PROD - BUILD' && webpack --config webpack.config.prod.js",
-    "release": "npm run build && babel src --out-dir build && cp README.md build/ && node scripts/release.js",
-    "module": "./node_modules/.bin/babel src --out-dir modules && node-sass --output-style compressed src/lib/Timeline.scss > modules/lib/Timeline.css && sed -i 's/Timeline\\.scss/Timeline\\.css/g' modules/lib/Timeline.js",
-    "lint": "eslint --ext .js,.jsx src",
-    "lintfix": "eslint --ext .js,.jsx src --fix",
-    "info": "npm info react-calendar-timeline",
-    "start": "./node_modules/.bin/webpack-dev-server --inline --hot --host 0.0.0.0"
+    "build": "npm run build:lib",
+    "build:demo": "echo '!!! Building Demo' && BABEL_ENV=react node build.js production",
+    "build:lib": "echo '!!! Building Library' && ./node_modules/.bin/babel src --out-dir lib && ./node_modules/.bin/node-sass src/lib/Timeline.scss lib/lib/Timeline.css && sed -i'.bak' 's/Timeline\\.scss/Timeline\\.css/g' lib/lib/Timeline.js && rm lib/lib/Timeline.js.bak",
+    "jest": "node_modules/.bin/jest",
+    "jest:update": "node_modules/.bin/jest -u",
+    "lint": "eslint --ext .js,.jsx src demo *.js",
+    "lint:fix": "eslint --ext .js,.jsx src demo *.js --fix",
+    "prepublish": "npm run build:lib",
+    "start": "./node_modules/.bin/webpack-dev-server --hot --host 0.0.0.0 --port 8080 --display-modules",
+    "test": "npm run build:lib && npm run jest && npm run lint"
   },
+  "files": [
+    "lib",
+    "src"
+  ],
   "homepage": "https://github.com/mkawczynski07/react-calendar-timeline",
   "repository": {
     "type": "git",
@@ -36,7 +40,17 @@
   "standard": {
     "parser": "babel-eslint"
   },
+  "jest": {
+    "verbose": true,
+    "testMatch": [
+      "**/__tests__/*.js"
+    ],
+    "moduleNameMapper": {
+      "^.+\\.(css|scss)$": "<rootDir>/src/mocks/styleMock.js"
+    }
+  },
   "dependencies": {
+    "element-resize-detector": "^1.1.12",
     "interact.js": "^1.2.6",
     "react-pure-render": "^1.0.2"
   },
@@ -56,6 +70,7 @@
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-0": "^6.5.0",
     "css-loader": "~0.26.0",
+    "enzyme": "^2.8.2",
     "es5-shim": "~4.5.9",
     "eslint": "^3.10.2",
     "eslint-config-standard": "^6.2.1",
@@ -63,17 +78,21 @@
     "eslint-plugin-react": "^6.7.1",
     "eslint-plugin-standard": "^2.0.1",
     "extract-text-webpack-plugin": "^1.0.1",
+    "faker": "^4.1.0",
+    "file-loader": "^0.11.2",
     "jasmine": "~2.5.2",
     "jasmine-core": "~2.5.2",
+    "jest": "^19.0.2",
     "karma": "~1.3.0",
     "karma-jasmine": "~1.0.2",
     "karma-phantomjs-launcher": "~1.0.2",
     "karma-sourcemap-loader": "~0.3.7",
     "karma-webpack": "~1.8.0",
     "moment": "^2.11.1",
-    "node-sass": "^3.4.2",
+    "node-sass": "^4.5.3",
     "react": "^15.0.1",
     "react-addons-perf": "^15.0.1",
+    "react-addons-test-utils": "^15.5.1",
     "react-dom": "^15.0.1",
     "react-hot-loader": "^3.0.0-beta.6",
     "rimraf": "^2.5.0",

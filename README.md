@@ -4,13 +4,17 @@ This is new version of the [react-calendar-timeline](https://github.com/namespac
 
 A modern and responsive react timeline component.
 
-![calendar demo](https://raw.githubusercontent.com/namespace-ee/react-calendar-timeline/master/doc/demo.gif)
+![calendar demo](https://raw.githubusercontent.com/namespace-ee/react-calendar-timeline/master/demo.gif)
 
 Demo here: http://namespace.ee/react-calendar-timeline/
 
 ## Getting started
 
-```
+```bash
+# via yarn
+yarn add new-react-calendar-timeline
+
+# via npm
 npm install --save new-react-calendar-timeline
 ```
 
@@ -18,7 +22,11 @@ npm install --save new-react-calendar-timeline
 
 You need to install them separately:
 
-```
+```bash
+# via yarn
+yarn add react react-dom # you probably already have these
+yarn add moment interact.js
+
 # via npm
 npm install --save react react-dom # you probably already have these
 npm install --save moment interact.js
@@ -63,18 +71,19 @@ The component can take many props:
 
 ### groups
 Expects either a vanilla JS array or an immutableJS array, consisting of objects with the following attributes:
-```
+```js
 {
   id: 1,
-  title: 'group 1'
+  title: 'group 1',
+  rightTitle: 'title in the right sidebar'
 }
 ```
 
-If you use right sidebar, you can pass `right_sidebar` optional property here.
+If you use right sidebar, you can pass optional `rightTitle` property here.
 
 ### items
 Expects either a vanilla JS array or an immutableJS array, consisting of objects with the following attributes:
-```
+```js
 {
   id: 1,
   group: 1,
@@ -86,23 +95,26 @@ Expects either a vanilla JS array or an immutableJS array, consisting of objects
   canChangeGroup: false,
   className: 'weekend',
   itemProps: {
-    'data-custom-attribute': 'Random content'
+    // these optional attributes are passed to the root <div /> of each item as <div {...itemProps} />
+    'data-custom-attribute': 'Random content',
+    'aria-hidden': true,
+    onDoubleClick: () => { console.log('You clicked double!') }
   }
 }
 ```
 
-The preferred (fastest) option is to give unix timestamps in milliseconds for `start_time` and `end_time`. Objects that convert to them (java Date or moment()) will also work, but will be a lot slower.
+The preferred (fastest) option is to give unix timestamps in milliseconds for `start_time` and `end_time`. Objects that convert to them (JavaScript Date or moment()) will also work, but will be a lot slower.
 
 ### selected
 An array with id's corresponding to id's in items (`item.id`). If this prop is set you have to manage the selected items yourself within the `onItemSelect` handler to update the property with new id's. This overwrites the default behaviour of selecting one item on click.
 
 ### keys
 An array specifying keys in the `items` and `groups` objects. Defaults to
-```
+```js
 {
   groupIdKey: 'id',
   groupTitleKey: 'title',
-  groupRightSidebarKey: 'right_sidebar',
+  groupRightTitleKey: 'rightTitle',
   itemIdKey: 'id',
   itemTitleKey: 'title',    // key for item div content
   itemDivTitleKey: 'title', // key for item div title (<div title="text"/>)
@@ -114,6 +126,9 @@ An array specifying keys in the `items` and `groups` objects. Defaults to
 
 ### sidebarWidth
 Width of the sidebar in pixels. If set to `0`, the sidebar is not rendered. Defaults to `150`.
+
+### sidebarContent
+Everything passed here will be displayed above the left sidebar. Use this to display small filters or so. Defaults to `null`.
 
 ### rightSidebarWidth
 Width of the right sidebar in pixels. If set to `0`, the right sidebar is not rendered. Defaults to `0`.
@@ -179,6 +194,9 @@ Can items be resized? Can be overridden in the `items` array. Accepted values: `
 ### useResizeHandle
 Append a special `.rct-drag-right` handle to the elements and only resize if dragged from there. Defaults to `false`
 
+### showCursorLine
+Show a vertical line at the snap point when you mouse over the calendar
+
 ### stackItems
 Stack items under each other, so there is no visual overlap when times collide. Defaults to `false`.
 
@@ -215,17 +233,20 @@ Called when an item is selected. This is sent on the first click on an item.
 ### onItemClick(itemId, e)
 Called when an item is clicked. Note: the item must be selected before it's clicked... except if it's a touch event and `itemTouchSendsClick` is enabled.
 
-### onCanvasClick(groupId, time, e)
-Called when an empty spot on the canvas was clicked. Get the group ID and the time as arguments. For example open a "new item" window after this.
-
-### onCanvasDoubleClick(groupId, time,e )
-Called when an empty spot on the canvas was double clicked. Get the group ID and the time as arguments.
-
 ### onItemDoubleClick(itemId, e)
 Called when an item was double clicked
 
 ### onItemContextMenu(itemId, e)
 Called when the item is clicked by the right button of the mouse. Note: If this property is set the default context menu doesn't appear
+
+### onCanvasClick(groupId, time, e)
+Called when an empty spot on the canvas was clicked. Get the group ID and the time as arguments. For example open a "new item" window after this.
+
+### onCanvasDoubleClick(groupId, time, e)
+Called when an empty spot on the canvas was double clicked. Get the group ID and the time as arguments.
+
+### onCanvasContextMenu(group, time, e)
+Called when the canvas is clicked by the right button of the mouse. Note: If this property is set the default context menu doesn't appear
 
 ### moveResizeValidator(action, itemId, time, resizeEdge)
 This function is called when an item is being moved or resized. It's up to this function to return a new version of `change`, when the proposed move would violate business logic.
@@ -290,17 +311,77 @@ function (item, targetGroupOrder, groupDelta, previousGroupDelta) {
 Unless overridden by `visibleTimeStart` and `visibleTimeEnd`, specify where the calendar begins and where it ends. This parameter expects a Date or moment object.
 
 ### visibleTimeStart and visibleTimeEnd
-The exact viewport of the calendar. When these are specified, scrolling in the calendar must be orchestrated by the `onTimeChange` function.
+The exact viewport of the calendar. When these are specified, scrolling in the calendar must be orchestrated by the `onTimeChange` function.  This parameter expects a unix timestamp in milliseconds.
+
+### headerLabelFormats and subHeaderLabelFormats
+The formats passed to moment to render times in the header and subheader. Defaults to these:
+
+```js
+import { defaultHeaderLabelFormats, defaultSubHeaderLabelFormats } from 'react-calendar-timeline'
+
+defaultHeaderLabelFormats == {
+  yearShort: 'YY',
+  yearLong: 'YYYY',
+  monthShort: 'MM/YY',
+  monthMedium: 'MM/YYYY',
+  monthMediumLong: 'MMM YYYY',
+  monthLong: 'MMMM YYYY',
+  dayShort: 'L',
+  dayLong: 'dddd, LL',
+  hourShort: 'HH',
+  hourMedium: 'HH:00',
+  hourMediumLong: 'L, HH:00',
+  hourLong: 'dddd, LL, HH:00',
+  time: 'LLL'
+}
+
+defaultSubHeaderLabelFormats == {
+  yearShort: 'YY',
+  yearLong: 'YYYY',
+  monthShort: 'MM',
+  monthMedium: 'MMM',
+  monthLong: 'MMMM',
+  dayShort: 'D',
+  dayMedium: 'dd D',
+  dayMediumLong: 'ddd, Do',
+  dayLong: 'dddd, Do',
+  hourShort: 'HH',
+  hourLong: 'HH:00',
+  minuteShort: 'mm',
+  minuteLong: 'HH:mm'
+}
+```
+
+For US time formats (AM/PM), use these:
+
+```js
+import { defaultHeaderLabelFormats, defaultSubHeaderLabelFormats } from 'react-calendar-timeline'
+
+const usHeaderLabelFormats = Object.assign({}, defaultSubHeaderLabelFormats, {
+  hourShort: 'h A',
+  hourMedium: 'h A',
+  hourMediumLong: 'L, h A',
+  hourLong: 'dddd, LL, h A',
+})
+
+const usSubHeaderLabelFormats = Object.assign({}, defaultSubHeaderLabelFormats, {
+  hourShort: 'h A',
+  hourLong: 'h A',
+  minuteLong: 'h:mm A'
+})
+```
+
+... and then pass these as `headerLabelFormats` and `subHeaderLabelFormats`
 
 ### onTimeChange(visibleTimeStart, visibleTimeEnd, updateScrollCanvas)
-A function that's called when the user tries to scroll. Call the passed `updateScrollCanvas(start, end)` with the updated visibleTimeStart and visibleTimeEnd to change the scroll behavior, for example to limit scrolling.
+A function that's called when the user tries to scroll. Call the passed `updateScrollCanvas(start, end)` with the updated visibleTimeStart and visibleTimeEnd (as unix timestamps in milliseconds) to change the scroll behavior, for example to limit scrolling.
 
 Here is an example that limits the timeline to only show dates starting 6 months from now and ending in 6 months.
 
 ```js
 // this limits the timeline to -6 months ... +6 months
-var minTime = moment().add(-6, 'months').valueOf()
-var maxTime = moment().add(6, 'months').valueOf()
+const minTime = moment().add(-6, 'months').valueOf()
+const maxTime = moment().add(6, 'months').valueOf()
 
 function (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) {
   if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
@@ -316,13 +397,72 @@ function (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) {
 ```
 
 ### onTimeInit(visibleTimeStart, visibleTimeEnd)
-Called when the calendar is first initialised
+Called when the calendar is first initialised. `visibleTimeStart` and `visibleTimeEnd` are unix timestamps in milliseconds.
 
 ### onBoundsChange(canvasTimeStart, canvasTimeEnd)
-Called when the bounds in the calendar's canvas change. Use it for example to load new data to display. (see "Behind the scenes" below)
+Called when the bounds in the calendar's canvas change. Use it for example to load new data to display. (see "Behind the scenes" below). `canvasTimeStart` and `canvasTimeEnd` are unix timestamps in milliseconds.
+
+### itemRenderer
+React component that will be used to render the item content.  Will be
+passed the `item` as a prop. Using complex components may result in
+performance problems.
+
+```jsx
+let items = [
+  {
+    id: 1,
+    group: 1,
+    title: 'Title',
+    tip: 'additional information',
+    ...
+  }
+]
+
+itemRenderer = ({ item }) => {
+  return (
+    <div className='custom-item'>
+      <span className='title'>{item.title}</span>
+      <p className='tip'>{item.tip}</p>
+    </div>
+  )
+}
+```
+
+### groupRenderer
+React component that will be used to render the content of groups in the
+sidebar. Will be passed the `group` and `isRightSidebar` as props.
+
+```jsx
+let groups = [
+  {
+    id: 1,
+    title: 'Title',
+    tip: 'additional information'
+  }
+]
+
+groupRenderer = ({ group }) => {
+  return (
+    <div className='custom-group'>
+      <span className='title'>{group.title}</span>
+      <p className='tip'>{group.tip}</p>
+    </div>
+  )
+}
+```
+
+### resizeDetector
+The component automatically detects when the window has been resized. Optionally you can also detect when the component's DOM element has been resized.
+To do this, pass a `resizeDetector`. Since bundling it by default would add ~18kb of minimized JS, you need to opt in to this like so:
+
+```jsx
+import componentResizeDetector from 'react-calendar-timeline/lib/resize-detector/component'
+
+<Timeline resizeDetector={componentResizeDetector} ... />
+```
 
 ### children
-All children of the Timeline component will be displayed above the sidebar. Use this to display small filters or so.
+**DEPRECATED. User the sidebarContent prop instead.** All children of the Timeline component will be displayed above the sidebar. Use this to display small filters or so.
 
 ## FAQ
 
@@ -332,7 +472,7 @@ All children of the Timeline component will be displayed above the sidebar. Use 
 
 You will then need to override the default CSS rule:
 
-```
+```css
 .react-calendar-timeline .rct-items .rct-item.analysis {
   backgroundColor: #68efad;
 }
@@ -344,13 +484,13 @@ The library supports right sidebar.
 ![right sidebar demo](doc/right-sidebar.png)
 
 To use it, you need to add two props to the `<Timeline />` component:
-```
-      rightSidebarWidth={150}
-      rightSidebarContent={<p>Second filter</p>}
+```jsx
+rightSidebarWidth={150}
+rightSidebarContent={<p>Second filter</p>}
 ```
 
 And add `right_sidebar` prop to the groups objects:
-```
+```js
 {
   id: 1,
   title: 'group 1',
@@ -367,3 +507,29 @@ Speed: The calendar itself is actually a 3x wide scrolling canvas of the screen.
 This results in a visually endless scrolling canvas with optimal performance.
 
 Extensibility and usability: While some parameters (`onTimeChange`, `moveResizeValidator`) might be hard to configure, these are design decisions to make it as extensible as possible. If you have recipes for common tasks regarding those parameters, send a PR to add them to this doc.
+
+
+## Contribute
+If you like to improve React Calendar Timeline fork the repo and get started by running the following:
+
+```bash
+$ git clone https://github.com/namespace-ee/react-calendar-timeline.git react-calendar-timeline
+$ cd react-calendar-timeline
+$ npm install
+$ npm start
+```
+
+Check http://0.0.0.0:8080/ in your browser and have fun!
+
+Please run `npm run lint` before you send a pull request. `npm run jest` runs the tests.
+
+
+<!--
+
+If you are core member team to patch npm run:
+
+```bash
+npm version patch
+```
+
+-->

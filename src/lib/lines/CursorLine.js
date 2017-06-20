@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-export default class TodayLine extends Component {
+export default class CursorLine extends Component {
   static propTypes = {
     canvasTimeStart: PropTypes.number.isRequired,
     canvasTimeEnd: PropTypes.number.isRequired,
@@ -10,16 +10,12 @@ export default class TodayLine extends Component {
     lineCount: PropTypes.number.isRequired
   }
 
-  static defaultProps = {
-  }
-
-  // TODO: should currentTime come from a prop? probably...?
   render () {
-    let currentTime = new Date().getTime()
+    const { cursorTime } = this.props
 
-    if (currentTime > this.props.canvasTimeStart && currentTime < this.props.canvasTimeEnd) {
+    if (cursorTime > this.props.canvasTimeStart && cursorTime < this.props.canvasTimeEnd) {
       const ratio = this.props.canvasWidth / (this.props.canvasTimeEnd - this.props.canvasTimeStart)
-      const left = Math.round((currentTime - this.props.canvasTimeStart) * ratio)
+      const left = Math.round((cursorTime - this.props.canvasTimeStart) * ratio)
       const top = this.props.headerHeight
       const height = this.props.height - this.props.headerHeight
       const styles = {
@@ -28,7 +24,7 @@ export default class TodayLine extends Component {
         height: `${height}px`
       }
 
-      return <div className='rct-today' style={styles} />
+      return <div className='rct-cursor-line' style={styles} />
     } else {
       return <div />
     }

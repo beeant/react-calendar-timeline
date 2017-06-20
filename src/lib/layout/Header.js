@@ -1,9 +1,33 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import moment from 'moment'
 
 import { iterateTimes, getNextUnit } from '../utils.js'
 
 export default class Header extends Component {
+  static propTypes = {
+    hasRightSidebar: PropTypes.bool.isRequired,
+    showPeriod: PropTypes.func.isRequired,
+    canvasTimeStart: PropTypes.number.isRequired,
+    canvasTimeEnd: PropTypes.number.isRequired,
+    canvasWidth: PropTypes.number.isRequired,
+    lineHeight: PropTypes.number.isRequired,
+    visibleTimeStart: PropTypes.number.isRequired,
+    visibleTimeEnd: PropTypes.number.isRequired,
+    minUnit: PropTypes.string.isRequired,
+    timeSteps: PropTypes.object.isRequired,
+    width: PropTypes.number.isRequired,
+    headerLabelFormats: PropTypes.object.isRequired,
+    subHeaderLabelFormats: PropTypes.object.isRequired,
+    fixedHeader: PropTypes.oneOf(['fixed', 'absolute', 'none']),
+    zIndex: PropTypes.number
+  }
+
+  static defaultProps = {
+    fixedHeader: 'none',
+    zIndex: 11
+  }
+
   constructor (props) {
     super(props)
     this.state = {
@@ -52,30 +76,34 @@ export default class Header extends Component {
   }
 
   headerLabel (time, unit, width) {
+    const { headerLabelFormats: f } = this.props
+
     if (unit === 'year') {
-      return time.format(width < 46 ? 'YY' : 'YYYY')
+      return time.format(width < 46 ? f.yearShort : f.yearLong)
     } else if (unit === 'month') {
-      return time.format(width < 65 ? 'MM/YY' : width < 75 ? 'MM/YYYY' : width < 120 ? 'MMM YYYY' : 'MMMM YYYY')
+      return time.format(width < 65 ? f.monthShort : width < 75 ? f.monthMedium : width < 120 ? f.monthMediumLong : f.monthLong)
     } else if (unit === 'day') {
-      return time.format(width < 150 ? 'L' : 'dddd, LL')
+      return time.format(width < 150 ? f.dayShort : f.dayLong)
     } else if (unit === 'hour') {
-      return time.format(width < 50 ? 'HH' : width < 130 ? 'HH:00' : width < 150 ? 'L, HH:00' : 'dddd, LL, HH:00')
+      return time.format(width < 50 ? f.hourShort : width < 130 ? f.hourMedium : width < 150 ? f.hourMediumLong : f.hourLong)
     } else {
-      return time.format('LLL')
+      return time.format(f.time)
     }
   }
 
   subHeaderLabel (time, unit, width) {
+    const { subHeaderLabelFormats: f } = this.props
+
     if (unit === 'year') {
-      return time.format(width < 46 ? 'YY' : 'YYYY')
+      return time.format(width < 46 ? f.yearShort : f.yearLong)
     } else if (unit === 'month') {
-      return time.format(width < 37 ? 'MM' : width < 85 ? 'MMM' : 'MMMM')
+      return time.format(width < 37 ? f.monthShort : width < 85 ? f.monthMedium : f.monthLong)
     } else if (unit === 'day') {
-      return time.format(width < 47 ? 'D' : width < 80 ? 'dd D' : width < 120 ? 'ddd, Do' : 'dddd, Do')
+      return time.format(width < 47 ? f.dayShort : width < 80 ? f.dayMedium : width < 120 ? f.dayMediumLong : f.dayLong)
     } else if (unit === 'hour') {
-      return time.format(width < 50 ? 'HH' : 'HH:00')
+      return time.format(width < 50 ? f.hourShort : f.hourLong)
     } else if (unit === 'minute') {
-      return time.format(width < 60 ? 'mm' : 'HH:mm')
+      return time.format(width < 60 ? f.minuteShort : f.minuteLong)
     } else {
       return time.get(unit)
     }
@@ -126,7 +154,7 @@ export default class Header extends Component {
     const {
       canvasTimeStart, canvasTimeEnd, canvasWidth, lineHeight,
       visibleTimeStart, visibleTimeEnd, minUnit, timeSteps, fixedHeader,
-      headerLabelGroupHeight, headerLabelHeight, hasRightSidebar
+      headerLabelGroupHeight, headerLabelHeight, hasRightSidebar, width
     } = this.props
     const {
       scrollTop
@@ -149,7 +177,7 @@ export default class Header extends Component {
         timeLabels.push(
           <div key={`top-label-${time.valueOf()}`}
                href='#'
-               className={`rct-label-group ${hasRightSidebar ? 'rct-has-right-sidebar' : ''}`}
+               className={`rct-label-group${hasRightSidebar ? ' rct-has-right-sidebar' : ''}`}
                data-time={time}
                data-unit={nextUnit}
                style={{
@@ -176,7 +204,7 @@ export default class Header extends Component {
       timeLabels.push(
         <div key={`label-${time.valueOf()}`}
              href='#'
-             className={`rct-label ${twoHeaders ? '' : 'rct-label-only'} ${firstOfType ? 'rct-first-of-type' : ''} `}
+             className={`rct-label ${twoHeaders ? '' : 'rct-label-only'} ${firstOfType ? 'rct-first-of-type' : ''} ${(minUnit !== 'month' ? `rct-day-${time.day()}` : '')} `}
              data-time={time}
              data-unit={minUnit}
              style={{
@@ -202,7 +230,7 @@ export default class Header extends Component {
 
     if (fixedHeader === 'fixed') {
       headerStyle.position = 'fixed'
-      headerStyle.width = '100%'
+      headerStyle.width = `${width}px`
       headerStyle.zIndex = zIndex
     } else if (fixedHeader === 'absolute') {
       let componentTop = this.state.componentTop
@@ -220,29 +248,4 @@ export default class Header extends Component {
       </div>
     )
   }
-}
-
-Header.propTypes = {
-  // groups: React.PropTypes.array.isRequired,
-  // width: React.PropTypes.number.isRequired,
-  // lineHeight: React.PropTypes.number.isRequired,
-  // headerBackgroundColor: React.PropTypes.string.isRequired,
-  hasRightSidebar: React.PropTypes.bool.isRequired,
-  showPeriod: React.PropTypes.func.isRequired,
-  canvasTimeStart: React.PropTypes.number.isRequired,
-  canvasTimeEnd: React.PropTypes.number.isRequired,
-  canvasWidth: React.PropTypes.number.isRequired,
-  lineHeight: React.PropTypes.number.isRequired,
-  visibleTimeStart: React.PropTypes.number.isRequired,
-  visibleTimeEnd: React.PropTypes.number.isRequired,
-  // visibleTimeEnd: React.PropTypes.number.isRequired,
-  minUnit: React.PropTypes.string.isRequired,
-  timeSteps: React.PropTypes.object.isRequired,
-  width: React.PropTypes.number.isRequired,
-  fixedHeader: React.PropTypes.oneOf(['fixed', 'absolute', 'none']),
-  zIndex: React.PropTypes.number
-}
-Header.defaultProps = {
-  fixedHeader: 'none',
-  zIndex: 11
 }
