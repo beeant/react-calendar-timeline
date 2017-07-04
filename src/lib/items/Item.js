@@ -215,23 +215,25 @@ export default class Item extends Component {
         if (this.state.dragging) {
           let dragTime = this.dragTime(e)
           let dragGroupDelta = this.dragGroupDelta(e)
-          let targetDragGroupDelta = dragGroupDelta
 
           if (this.props.moveGroupValidator) {
-            if (dragGroupDelta !== this.state.dragGroupDelta && dragGroupDelta !== this.state.targetDragGroupDelta) {
-              dragGroupDelta = this.props.moveGroupValidator(
-                this.props.item,
-                this.props.order + targetDragGroupDelta,
-                dragGroupDelta,
-                this.state.dragGroupDelta
-              )
-            } else if (dragGroupDelta === this.state.targetDragGroupDelta) {
-              dragGroupDelta = this.state.dragGroupDelta
-            }
+            dragGroupDelta = this.props.moveGroupValidator(
+              this.props.item,
+              this.props.order + dragGroupDelta,
+              dragGroupDelta,
+              this.state.dragGroupDelta,
+              dragTime
+            )
           }
 
           if (this.props.moveResizeValidator) {
-            dragTime = this.props.moveResizeValidator('move', this.props.item, dragTime, this.props.order + dragGroupDelta)
+            dragTime = this.props.moveResizeValidator(
+              'move',
+              this.props.item,
+              dragTime,
+              this.props.order + dragGroupDelta,
+              this.state.dragTime
+            )
           }
 
           if (this.props.onDrag) {
@@ -240,8 +242,7 @@ export default class Item extends Component {
 
           this.setState({
             dragTime: dragTime,
-            dragGroupDelta: dragGroupDelta,
-            targetDragGroupDelta: targetDragGroupDelta
+            dragGroupDelta: dragGroupDelta
           })
         }
       })
@@ -256,8 +257,7 @@ export default class Item extends Component {
             dragStart: null,
             preDragPosition: null,
             dragTime: null,
-            dragGroupDelta: null,
-            targetDragGroupDelta: null
+            dragGroupDelta: null
           })
         }
       })
@@ -286,7 +286,7 @@ export default class Item extends Component {
           let resizeTime = this.resizeTimeSnap(time + this.resizeTimeDelta(e, resizeEdge))
 
           if (this.props.moveResizeValidator) {
-            resizeTime = this.props.moveResizeValidator('resize', this.props.item, resizeTime, resizeEdge)
+            resizeTime = this.props.moveResizeValidator('resize', this.props.item, resizeTime, resizeEdge, this.state.resizeTime)
           }
 
           if (this.props.onResizing) {
