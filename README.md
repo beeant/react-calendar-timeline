@@ -145,8 +145,13 @@ The minimum width, in pixels, of a timeline entry when it's possible to resize. 
 ### fixedHeader
 How does the header (the scrolling part with dates) behave if not all of the groups fit on the page, resulting in a vertical scrollbar.
 
-* `fixed` - the header is always on the screen
-* `none` (default) - the header is always at the top of the component
+* `fixed` - the header is always fixed to its initial position
+* `sticky` (default) - the header follows the scroll of the page to be always visible
+* `none` - the header is always at the top of the component and doesn't stick with scrolling
+
+### stickyOffset
+If fixedHeader is `sticky`, at what height from the top of the screen should we start floating it? This is useful if for example you already have
+a sticky navbar. Defaults `0`.
 
 ### fullUpdate
 If your calendar has large items compared to the zoom level (e.g. multi week events when viewing one day at a time), set this to `true` (default).
@@ -157,9 +162,6 @@ When set to `true` we update the dimensions of the items on every scroll event. 
 are always fully on the screen, even if the start or end of the items is off screen, 2) item stacking also reflects what's on the screen.
 
 When set to `false`, we update the dimensions of the items only when the [scrolling canvas](https://github.com/namespace-ee/react-calendar-timeline#behind-the-scenes) updates. This makes scrolling much faster, but labels can go off screen.
-
-### zIndexStart
-What z-index value do the header and the sidebar have. Default `10`
 
 ### lineHeight
 Height of one line in the calendar in pixels. Default `30`
@@ -456,13 +458,29 @@ The component automatically detects when the window has been resized. Optionally
 To do this, pass a `resizeDetector`. Since bundling it by default would add ~18kb of minimized JS, you need to opt in to this like so:
 
 ```jsx
-import componentResizeDetector from 'react-calendar-timeline/lib/resize-detector/component'
+import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector/container'
 
-<Timeline resizeDetector={componentResizeDetector} ... />
+<Timeline resizeDetector={containerResizeDetector} ... />
 ```
 
-### children
-**DEPRECATED. User the sidebarContent prop instead.** All children of the Timeline component will be displayed above the sidebar. Use this to display small filters or so.
+### children (plugins)
+If you give the component any children, they will be passed some extra props. Use this to render anything on the timeline (custom backgrounds, arrows, etc).
+
+See [the plugins demo](http://namespace.ee/react-calendar-timeline-docs/#/plugins) ([code](https://github.com/namespace-ee/react-calendar-timeline/blob/master/demo/app/demo-plugins/index.js)) for an example.
+
+**NOTE!** This API is still experimental and will change in the next versions, as we move toward unifying the internal and external APIs. Keep an eye out for the [changelog](https://github.com/namespace-ee/react-calendar-timeline/blob/master/CHANGELOG.md)!
+
+The children gets passed the following props:
+
+* `canvasTimeStart`, `canvasTimeEnd` - start and end of the scrolling canvas in Unix timestamps
+* `canvasWidth` - width of the scrolling canvas in pixels
+* `visibleTimeStart`, `visibleTimeEnd` - start and end of the currently visible area
+* `groups`, `items`, `keys` - groups, items and keys as passed to the timeline
+* `height`, `headerHeight` - height of the entire calendar (includes `headerHeight`) or just the header
+* `groupHeights`, `groupTops` - arrays of heights and tops for the groups
+* `dimensionItems` - an array of objects `{ id, dimensions: {...} }` describing positions of all the items
+* `selected` - an array of selected items
+* `timeSteps` - steps for displaying time
 
 ## FAQ
 
@@ -498,8 +516,40 @@ And add `right_sidebar` prop to the groups objects:
 }
 ```
 
+### I'm using Babel with Rollup or Webpack 2+ and I'm getting strange bugs with click events
+
+These module bundlers don't use the transpiled (ES5) code of this module. They load the original ES2015+ source. Thus your babel configuration needs to match ours. We recommend adding the [`stage-0` preset](https://babeljs.io/docs/plugins/preset-stage-0/) to your `.babelrc` to make sure everything works as intended.
+
+If that's too experimental, then the minimum you need is to add is the [`transform-class-properties`](https://babeljs.io/docs/plugins/transform-class-properties/) plugin that's in stage-2 and possibly the [`transform-object-rest-spread`](https://babeljs.io/docs/plugins/transform-object-rest-spread/) plugin from stage-3. However in this case it's easier to make sure you have at least [`stage-2`](https://babeljs.io/docs/plugins/preset-stage-2/) enabled.
+
+See [issue 51](https://github.com/namespace-ee/react-calendar-timeline/issues/51) for more details.
+
+Alternatively you may import the transpiled version of the timeline like this:
+
+```js
+// import Timeline from 'react-calendar-timeline'  // ESnext version
+import Timeline from 'react-calendar-timeline/lib' // ES5 version
+```
+
+However doing so you lose on some of the features of webpack 2 and will potentially get a slightly larger bundle.
+
+### It doesn't work with `create-react-app`
+
+It's the same issue as above. See [issue 134](https://github.com/namespace-ee/react-calendar-timeline/issues/134#issuecomment-314215244) for details and options.
+
+### What are the zIndex values for all the elements?
+
+This is useful when using the plugins (that you pass as children to the component). Override the CSS to change:
+
+* Horizontal Lines: 30
+* Vertical Lines: 40
+* Today line: 50
+* Cursor line: 51
+* Items: 80-88 (depending on selection, dragging, etc)
+* Header: 90
 
 ## Behind the scenes
+
 The timeline is built with speed, usability and extensibility in mind.
 
 Speed: The calendar itself is actually a 3x wide scrolling canvas of the screen. All scroll events left and right happen naturally, like scrolling any website. When the timeline has scrolled enough (50% of the invisible surface on one side), we change the "position:absolute;left:{num}px;" variables of each of the visible items and scroll the canvas back. When this happens, the `onBoundsChange` prop is called.
@@ -508,8 +558,22 @@ This results in a visually endless scrolling canvas with optimal performance.
 
 Extensibility and usability: While some parameters (`onTimeChange`, `moveResizeValidator`) might be hard to configure, these are design decisions to make it as extensible as possible. If you have recipes for common tasks regarding those parameters, send a PR to add them to this doc.
 
+## Interaction
+
+To interact and navigate within the timeline there are the following options for the user:
+
+```
+shift + mousewheel = move timeline left/right
+alt + mousewheel = zoom in/out
+ctrl + mousewheel = zoom in/out 10× faster
+meta + mousewheel = zoom in/out 3x faster (win or cmd + mousewheel)
+```
+
+Plus there is a handling for pinch-in and pinch-out zoom gestures (two touch points).
+The pinch gesture on a trackpad (not a touch device) works in Chrome and Firefox (v55+) because these browsers map the gesture to `ctrl + mousewheel`.
 
 ## Contribute
+
 If you like to improve React Calendar Timeline fork the repo and get started by running the following:
 
 ```bash

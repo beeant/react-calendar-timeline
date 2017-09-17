@@ -23,7 +23,6 @@ export default class Items extends Component {
     canvasTimeStart: PropTypes.number.isRequired,
     canvasTimeEnd: PropTypes.number.isRequired,
     canvasWidth: PropTypes.number.isRequired,
-    lineHeight: PropTypes.number.isRequired,
 
     dragSnap: PropTypes.number,
     minResizeWidth: PropTypes.number,
@@ -64,7 +63,6 @@ export default class Items extends Component {
              nextProps.canvasWidth === this.props.canvasWidth &&
              nextProps.selectedItem === this.props.selectedItem &&
              nextProps.selected === this.props.selected &&
-             nextProps.lineHeight === this.props.lineHeight &&
              nextProps.dragSnap === this.props.dragSnap &&
              nextProps.minResizeWidth === this.props.minResizeWidth &&
              nextProps.canChangeGroup === this.props.canChangeGroup &&
@@ -134,7 +132,6 @@ export default class Items extends Component {
                                         canvasTimeStart={this.props.canvasTimeStart}
                                         canvasTimeEnd={this.props.canvasTimeEnd}
                                         canvasWidth={this.props.canvasWidth}
-                                        lineHeight={this.props.lineHeight}
                                         dragSnap={this.props.dragSnap}
                                         minResizeWidth={this.props.minResizeWidth}
                                         onResizing={this.props.itemResizing}
