@@ -90,14 +90,23 @@ export function coordinateToTimeRatio (canvasTimeStart, canvasTimeEnd, canvasWid
   return (canvasTimeEnd - canvasTimeStart) / canvasWidth
 }
 
-export function calculateDimensions ({ item, order, keys, canvasTimeStart, canvasTimeEnd, canvasWidth, dragSnap, lineHeight, draggingItem, dragTime, resizingItem, resizingEdge, resizeTime, newGroupOrder, itemHeightRatio, fullUpdate, visibleTimeStart, visibleTimeEnd }) {
-  var itemId = _get(item, keys.itemIdKey)
-  var itemTimeStart = _get(item, keys.itemTimeStartKey)
-  var itemTimeEnd = _get(item, keys.itemTimeEndKey)
-
-  var isDragging = itemId === draggingItem
-  var isResizing = itemId === resizingItem
-
+export function calculateDimensions ({
+                                       itemTimeStart,
+                                       itemTimeEnd,
+                                       isDragging,
+                                       isResizing,
+                                       canvasTimeStart,
+                                       canvasTimeEnd,
+                                       canvasWidth,
+                                       dragSnap,
+                                       dragTime,
+                                       resizingItem,
+                                       resizingEdge,
+                                       resizeTime,
+                                       fullUpdate,
+                                       visibleTimeStart,
+                                       visibleTimeEnd
+                                     }) {
   const itemStart = (isResizing && resizingEdge === 'left' ? resizeTime : itemTimeStart)
   const itemEnd = (isResizing && resizingEdge === 'right' ? resizeTime : itemTimeEnd)
 
@@ -141,20 +150,13 @@ export function calculateDimensions ({ item, order, keys, canvasTimeStart, canva
   }
 
   const ratio = 1 / coordinateToTimeRatio(canvasTimeStart, canvasTimeEnd, canvasWidth)
-  const h = lineHeight * itemHeightRatio
 
   const dimensions = {
     left: (x - canvasTimeStart) * ratio,
-    top: null,
     width: Math.max(w * ratio, 3),
-    height: h,
-    order: isDragging ? newGroupOrder : order,
-    stack: !item.isOverlay,
     collisionLeft: collisionX,
     originalLeft: itemTimeStart,
     collisionWidth: collisionW,
-    lineHeight,
-    isDragging,
     clippedLeft,
     clippedRight
   }
@@ -195,8 +197,8 @@ export function stack (items, groupOrders, lineHeight, headerHeight, force) {
   var i, iMax
   var totalHeight = headerHeight
 
-  var groupHeights = {}
-  var groupTops = {}
+  var groupHeights = []
+  var groupTops = []
 
   var groupedItems = getGroupedItems(items, groupOrders)
 
@@ -209,22 +211,22 @@ export function stack (items, groupOrders, lineHeight, headerHeight, force) {
 
   groupedItems.forEach(function (group, index, array) {
     // calculate new, non-overlapping positions
-    groupTops[index] = totalHeight
+    groupTops.push(totalHeight)
 
     var groupHeight = 0
     var verticalMargin = 0
     for (i = 0, iMax = group.length; i < iMax; i++) {
       var item = group[i]
-      verticalMargin = (item.dimensions.lineHeight - item.dimensions.height)
+      verticalMargin = (lineHeight - item.dimensions.height)
 
       if (item.dimensions.stack && item.dimensions.top === null) {
         item.dimensions.top = totalHeight + verticalMargin
-        groupHeight = Math.max(groupHeight, item.dimensions.lineHeight)
+        groupHeight = Math.max(groupHeight, lineHeight)
         do {
           var collidingItem = null
           for (var j = 0, jj = group.length; j < jj; j++) {
             var other = group[j]
-            if (other.dimensions.top !== null && other !== item && other.dimensions.stack && collision(item.dimensions, other.dimensions, item.dimensions.lineHeight)) {
+            if (other.dimensions.top !== null && other !== item && other.dimensions.stack && collision(item.dimensions, other.dimensions, lineHeight)) {
               collidingItem = other
               break
             } else {
@@ -234,13 +236,14 @@ export function stack (items, groupOrders, lineHeight, headerHeight, force) {
 
           if (collidingItem != null) {
             // There is a collision. Reposition the items above the colliding element
-            item.dimensions.top = collidingItem.dimensions.top + collidingItem.dimensions.lineHeight
+            item.dimensions.top = collidingItem.dimensions.top + lineHeight
             groupHeight = Math.max(groupHeight, item.dimensions.top + item.dimensions.height - totalHeight)
           }
         } while (collidingItem)
       }
     }
-    groupHeights[index] = Math.max(groupHeight + verticalMargin, lineHeight)
+
+    groupHeights.push(Math.max(groupHeight + verticalMargin, lineHeight))
     totalHeight += Math.max(groupHeight + verticalMargin, lineHeight)
   })
   return {
@@ -255,8 +258,8 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
 
   var totalHeight = headerHeight
 
-  var groupHeights = {}
-  var groupTops = {}
+  var groupHeights = []
+  var groupTops = []
 
   var groupedItems = getGroupedItems(items, groupOrders)
 
@@ -269,19 +272,20 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
 
   groupedItems.forEach(function (group, index, array) {
     // calculate new, non-overlapping positions
-    groupTops[index] = totalHeight
+    groupTops.push(totalHeight)
 
     var groupHeight = 0
     for (i = 0, iMax = group.length; i < iMax; i++) {
       var item = group[i]
-      var verticalMargin = (item.dimensions.lineHeight - item.dimensions.height) / 2
+      var verticalMargin = (lineHeight - item.dimensions.height) / 2
 
       if (item.dimensions.top === null) {
         item.dimensions.top = totalHeight + verticalMargin
-        groupHeight = Math.max(groupHeight, item.dimensions.lineHeight)
+        groupHeight = Math.max(groupHeight, lineHeight)
       }
     }
-    groupHeights[index] = Math.max(groupHeight, lineHeight)
+
+    groupHeights.push(Math.max(groupHeight, lineHeight))
     totalHeight += Math.max(groupHeight, lineHeight)
   })
   return {

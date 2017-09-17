@@ -7,9 +7,12 @@ export default class Sidebar extends Component {
   static propTypes = {
     groups: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
     width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
     lineHeight: PropTypes.number.isRequired,
-    zIndex: PropTypes.number,
-    fixedHeader: PropTypes.oneOf(['fixed', 'absolute', 'none']),
+    groupHeights: PropTypes.array.isRequired,
+    fixedHeader: PropTypes.oneOf(['fixed', 'sticky', 'none']),
+    stickyOffset: PropTypes.number.isRequired,
+    headerPosition: PropTypes.oneOf(['top', 'bottom', 'fixed']),
     keys: PropTypes.object.isRequired,
     groupRenderer: PropTypes.func,
     children: PropTypes.node,
@@ -17,70 +20,23 @@ export default class Sidebar extends Component {
   }
 
   static defaultProps = {
-    fixedHeader: 'none',
-    zIndex: 12,
+    fixedHeader: 'sticky',
+    stickyOffset: 0,
+    headerPosition: 'top',
     children: null,
     isRightSidebar: false
   }
 
-  constructor (props) {
-    super(props)
-    this.state = {
-      scrollTop: 0,
-      componentTop: 0
-    }
-  }
-
   shouldComponentUpdate (nextProps, nextState) {
-    if (nextProps.fixedHeader === 'absolute' && window && window.document && this.state.scrollTop !== nextState.scrollTop) {
-      return true
-    }
-
     return !(arraysEqual(nextProps.groups, this.props.groups) &&
              nextProps.keys === this.props.keys &&
              nextProps.width === this.props.width &&
              nextProps.lineHeight === this.props.lineHeight &&
              nextProps.fixedHeader === this.props.fixedHeader &&
-             nextProps.zIndex === this.props.zIndex &&
+             nextProps.stickyOffset === this.props.stickyOffset &&
+             nextProps.headerPosition === this.props.headerPosition &&
              nextProps.groupHeights === this.props.groupHeights &&
              nextProps.height === this.props.height)
-  }
-
-  scroll (e) {
-    if (this.props.fixedHeader === 'absolute' && window && window.document) {
-      const scroll = window.document.body.scrollTop
-      this.setState({
-        scrollTop: scroll
-      })
-    }
-  }
-
-  setComponentTop () {
-    const viewportOffset = this.refs.sidebar.getBoundingClientRect()
-    this.setState({
-      componentTop: viewportOffset.top
-    })
-  }
-
-  componentDidMount () {
-    this.setComponentTop()
-    this.scroll()
-
-    this.scrollEventListener = {
-      handleEvent: (event) => {
-        this.scroll()
-      }
-    }
-
-    window.addEventListener('scroll', this.scrollEventListener)
-  }
-
-  componentWillUnmount () {
-    window.removeEventListener('scroll', this.scrollEventListener)
-  }
-
-  componentWillReceiveProps () {
-    this.setComponentTop()
   }
 
   renderGroupContent (group, isRightSidebar, groupTitleKey, groupRightTitleKey) {
@@ -93,14 +49,10 @@ export default class Sidebar extends Component {
 
   render () {
     const {
-      fixedHeader, width, lineHeight, zIndex, groupHeights, height, headerHeight, isRightSidebar
+      fixedHeader, stickyOffset, width, lineHeight, groupHeights, height, headerHeight, isRightSidebar, headerPosition
     } = this.props
 
     const {groupIdKey, groupTitleKey, groupRightTitleKey} = this.props.keys
-
-    const {
-      scrollTop
-    } = this.state
 
     const sidebarStyle = {
       width: `${width}px`,
@@ -119,14 +71,17 @@ export default class Sidebar extends Component {
 
     if (fixedHeader === 'fixed') {
       headerStyle.position = 'fixed'
-      headerStyle.zIndex = zIndex
       groupsStyle.paddingTop = headerStyle.height
-    } else if (fixedHeader === 'absolute') {
-      let componentTop = this.state.componentTop
-      if (scrollTop >= componentTop) {
+    } else if (fixedHeader === 'sticky') {
+      if (headerPosition === 'top') {
+        // do nothing - keep at the top
+      } else if (headerPosition === 'fixed') {
+        headerStyle.position = 'fixed'
+        headerStyle.top = stickyOffset
+        groupsStyle.paddingTop = headerStyle.height
+      } else if (headerPosition === 'bottom') {
         headerStyle.position = 'absolute'
-        headerStyle.top = `${scrollTop - componentTop}px`
-        headerStyle.left = '0'
+        headerStyle.bottom = 0
         groupsStyle.paddingTop = headerStyle.height
       }
     }
